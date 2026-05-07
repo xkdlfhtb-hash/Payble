@@ -303,6 +303,16 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto
 .giscus-wrap{margin-top:16px;}
 .giscus-wrap iframe{border-radius:12px;}
 
+
+
+/* SUPABASE COMMENTS */
+.supabase-status{font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px;}
+.comment-error{padding:14px;border:1px dashed #f0b6b6;border-radius:12px;color:#b42318;font-size:13px;background:#fff7f7;text-align:center;line-height:1.6;}
+.comment-loading{padding:14px;border:1px dashed #d7dff0;border-radius:12px;color:var(--muted);font-size:13px;background:#fbfcff;text-align:center;}
+.comment-item .comment-item{margin-top:10px;}
+.comment-replies:empty{display:none;}
+.comment-admin-note{font-size:11px;color:#98a2b3;line-height:1.5;margin-top:8px;}
+
 </style>
 <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 </head>
@@ -684,26 +694,52 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto
 <div class="section-title" id="comments">💬 댓글</div>
 <div class="survey-card community-card">
   <div class="card-title" style="color:#2563eb">댓글</div>
-  <div class="card-desc">연봉 계산 결과, 기대 연봉, 이직 고민을 자유롭게 남겨보세요.</div>
-  <div class="giscus-wrap">
-<script src="https://giscus.app/client.js"
-        data-repo="xkdlfhtb-hash/payble"
-        data-repo-id="R_kgDOSXBpHw"
-        data-category="General"
-        data-category-id="DIC_kwDOSXBpH84C8hy6"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="light"
-        data-lang="ko"
-        crossorigin="anonymous"
-        async>
-</script>
+  <div class="card-desc">GitHub 로그인 없이 닉네임만으로 댓글을 남길 수 있습니다. 댓글 관리는 Supabase 대시보드에서 운영자가 처리합니다.</div>
+  <div class="source-note" id="supabaseSetupNotice" style="display:none">※ Supabase 연결 정보가 아직 설정되지 않았습니다. index.html의 PAYBLE_SUPABASE_URL, PAYBLE_SUPABASE_ANON_KEY 값을 입력하면 댓글이 활성화됩니다.</div>
+
+  <div class="topic-selector-wrap">
+    <div class="step-label">주제 선택</div>
+    <div class="chip-group topic-tabs" id="commentTopic">
+      <button class="chip selected" data-v="실질 연봉" onclick="selectCommentTopic(this)" type="button">실질 연봉</button>
+      <button class="chip" data-v="기대 연봉" onclick="selectCommentTopic(this)" type="button">기대 연봉</button>
+      <button class="chip" data-v="이직 고민" onclick="selectCommentTopic(this)" type="button">이직 고민</button>
+      <button class="chip" data-v="연봉 협상" onclick="selectCommentTopic(this)" type="button">연봉 협상</button>
+      <button class="chip" data-v="질문" onclick="selectCommentTopic(this)" type="button">질문</button>
+    </div>
+    <div class="topic-channel-note"><strong id="commentCurrentTopic">실질 연봉</strong> 주제의 댓글을 보고 있습니다.</div>
+  </div>
+
+  <form class="survey-form" id="publicCommentForm" onsubmit="submitPublicComment(event)">
+    <div class="reply-target-notice" id="replyTargetNotice" style="display:none"></div>
+
+    <div class="survey-grid single-field">
+      <div class="survey-field">
+        <label for="commentNick">닉네임</label>
+        <input id="commentNick" maxlength="24" placeholder="예: 연봉궁금러" autocomplete="nickname">
+      </div>
+    </div>
+
+    <div class="survey-field">
+      <label for="commentBody">댓글</label>
+      <textarea id="commentBody" maxlength="1000" rows="4" placeholder="연봉 계산 결과, 기대 연봉, 이직 고민 등을 자유롭게 남겨보세요." required></textarea>
+    </div>
+
+    <div class="survey-actions">
+      <button class="calc-btn btn-blue" type="submit">댓글 등록 →</button>
+      <button class="share-btn" type="button" onclick="loadPublicComments()">새로고침</button>
+      <button class="share-btn" type="button" onclick="fillCommentWithResult()">계산 결과 붙이기</button>
+    </div>
+  </form>
+
+  <div class="survey-list-wrap">
+    <div class="block-title bt-blue" id="commentChannelTitle">실질 연봉 댓글</div>
+    <div class="comment-list-public" id="publicCommentList">
+      <div class="empty-survey">댓글을 불러오는 중입니다.</div>
+    </div>
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ─── 칩 ───
 function sc(el,gid){document.querySelectorAll('#'+gid+' .chip').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');}
@@ -957,35 +993,7 @@ function cpPredict(){
 
 
 
-// ─── 피드백 + 댓글 ───
-const PUBLIC_COMMENT_KEY='payble_public_comments';
-let COMMENT_TOPICS=['실질 연봉','기대 연봉','이직 고민','연봉 협상','질문'];
-
-function currentCommentTopic(){
-  return gl('commentTopic') || COMMENT_TOPICS[0];
-}
-function setCommentTopic(topic, shouldRender=true){
-  const group=document.getElementById('commentTopic');
-  if(!group)return;
-  const btn=Array.from(group.querySelectorAll('.chip')).find(b=>b.dataset.v===topic);
-  if(!btn)return;
-  group.querySelectorAll('.chip').forEach(c=>c.classList.remove('selected'));
-  btn.classList.add('selected');
-  if(shouldRender)renderPublicComments();
-}
-function selectCommentTopic(el){
-  sc(el,'commentTopic');
-  clearReplyTarget(false);
-  renderPublicComments();
-}
-function updateCommentChannelHeader(topic, count){
-  const title=document.getElementById('commentChannelTitle');
-  const note=document.getElementById('commentChannelNote');
-  if(title)title.textContent=topic+' 댓글';
-  if(note)note.textContent='현재 '+topic+' 댓글창입니다. 이 주제로 등록된 댓글 '+count+'개를 보고 있습니다.';
-}
-
-
+// ─── 피드백 ───
 function buildResultSnapshot(){
   const parts=[];
   if(window._rr){
@@ -994,7 +1002,7 @@ function buildResultSnapshot(){
   if(window._pr){
     parts.push(`기대 연봉: ${window._pr.job} / ${window._pr.edu} / ${Number(window._pr.low).toLocaleString()}~${Number(window._pr.high).toLocaleString()}만원 / 중앙값 ${Number(window._pr.med).toLocaleString()}만원`);
   }
-  return parts.length?parts.join('\\n'):'계산 결과 없음';
+  return parts.length?parts.join('\n'):'계산 결과 없음';
 }
 function fillFeedbackSnapshot(){
   const el=document.getElementById('privateResultSnapshot');
@@ -1025,165 +1033,200 @@ function handlePrivateFeedbackSubmit(event){
   });
 }
 
-function loadPublicComments(){
-  try{return JSON.parse(localStorage.getItem(PUBLIC_COMMENT_KEY)||'[]');}
-  catch(e){return [];}
-}
-function savePublicComments(items){
-  try{localStorage.setItem(PUBLIC_COMMENT_KEY,JSON.stringify(items));}
-  catch(e){showToast('댓글 저장 공간이 부족해요.');}
-}
-function getPublicCommentById(items,id){
-  return items.find(c=>String(c.id)===String(id));
-}
-function attachResultToComment(){
-  const body=document.getElementById('commentBody');
-  if(!body)return;
-  const snapshot=buildResultSnapshot();
-  body.value=(body.value?body.value+'\n\n':'')+'['+snapshot+']';
-  body.focus();
-}
-function addPublicComment(){
-  const nickEl=document.getElementById('commentNick');
-  const bodyEl=document.getElementById('commentBody');
-  const nick=(nickEl?.value||'익명').trim().slice(0,20)||'익명';
-  const body=(bodyEl?.value||'').trim();
+// ─── Supabase 댓글 ───
+// 1) Supabase 대시보드에서 Project URL과 anon public key를 복사해 아래 두 값에 넣으세요.
+// 2) supabase_schema.sql을 SQL Editor에서 실행해야 댓글 테이블과 RLS 정책이 생성됩니다.
+const PAYBLE_SUPABASE_URL='YOUR_SUPABASE_PROJECT_URL';
+const PAYBLE_SUPABASE_ANON_KEY='YOUR_SUPABASE_ANON_PUBLIC_KEY';
 
-  if(body.length<2){showToast('댓글 내용을 2자 이상 입력해주세요.');bodyEl?.focus();return;}
-  const items=loadPublicComments();
-  const parentItem=window._replyTargetId ? getPublicCommentById(items,window._replyTargetId) : null;
-  const parentId=parentItem ? parentItem.id : null;
-  const topic=parentItem ? (parentItem.topic||currentCommentTopic()) : currentCommentTopic();
-  const now=Date.now();
+let paybleSupabaseClient=null;
+let COMMENT_TOPICS=['실질 연봉','기대 연봉','이직 고민','연봉 협상','질문'];
+let currentCommentTopic='실질 연봉';
+let replyTarget=null;
+let commentsAutoRefreshTimer=null;
 
-  items.unshift({
-    id:now,
-    parentId:parentId,
-    replyToNick:parentId ? (window._replyToNick||'익명') : '',
-    nick,
-    topic,
-    body,
-    likes:0,
-    createdAt:new Date().toISOString()
-  });
-  savePublicComments(items.slice(0,160));
-  if(bodyEl)bodyEl.value='';
-  clearReplyTarget(false);
-  setCommentTopic(topic,false);
-  renderPublicComments();
-  showToast(parentId?'답글이 등록됐어요.':'댓글이 등록됐어요.');
+function isSupabaseConfigured(){
+  return /^https:\/\/[a-zA-Z0-9.-]+\.supabase\.co\/?$/.test(PAYBLE_SUPABASE_URL || '')
+    && PAYBLE_SUPABASE_ANON_KEY
+    && !PAYBLE_SUPABASE_ANON_KEY.includes('YOUR_SUPABASE')
+    && PAYBLE_SUPABASE_ANON_KEY.length > 40;
 }
-function likePublicComment(id){
-  const items=loadPublicComments();
-  const item=getPublicCommentById(items,id);
-  if(item)item.likes=(Number(item.likes)||0)+1;
-  savePublicComments(items);
-  renderPublicComments();
+function getSupabaseClient(){
+  if(paybleSupabaseClient) return paybleSupabaseClient;
+  if(!isSupabaseConfigured() || !window.supabase || !window.supabase.createClient) return null;
+  paybleSupabaseClient=window.supabase.createClient(PAYBLE_SUPABASE_URL, PAYBLE_SUPABASE_ANON_KEY);
+  return paybleSupabaseClient;
 }
-function replyToPublicComment(id,nick){
-  const items=loadPublicComments();
-  const target=getPublicCommentById(items,id);
-  if(!target){showToast('원 댓글을 찾을 수 없어요.');return;}
-  const rootId=target.parentId || target.id;
-  const rootItem=getPublicCommentById(items,rootId) || target;
-  window._replyTargetId=rootId;
-  window._replyToNick=nick||target.nick||'익명';
-
-  setCommentTopic(rootItem.topic||target.topic||currentCommentTopic(),false);
-
-  const notice=document.getElementById('replyTargetNotice');
-  if(notice){
-    notice.style.display='flex';
-    notice.innerHTML=`<span><strong>${escapeHtml(window._replyToNick)}</strong>님 댓글에 답글 작성 중입니다. 등록하면 원 댓글 아래에 표시됩니다.</span><button type="button" onclick="clearReplyTarget(true)">취소</button>`;
-  }
-
-  const body=document.getElementById('commentBody');
-  if(body){
-    const mention='@'+window._replyToNick+' ';
-    if(!body.value.includes(mention)) body.value=(body.value?body.value+'\n':'')+mention;
-    body.focus();
-  }
-  document.getElementById('comments')?.scrollIntoView({behavior:'smooth',block:'start'});
-  renderPublicComments();
-}
-function clearReplyTarget(showMsg){
-  window._replyTargetId=null;
-  window._replyToNick='';
-  const notice=document.getElementById('replyTargetNotice');
-  if(notice){notice.style.display='none';notice.innerHTML='';}
-  if(showMsg)showToast('답글 작성을 취소했어요.');
-}
-function clearLocalComments(){
-  if(!confirm('내 브라우저에 저장된 댓글을 모두 삭제할까요? 다른 이용자의 화면에는 영향을 주지 않습니다.'))return;
-  savePublicComments([]);
-  clearReplyTarget(false);
-  renderPublicComments();
-  showToast('내 브라우저 댓글을 초기화했어요.');
-}
-function renderCommentItem(item,isReply){
-  const time=formatRelativeTime(item.createdAt);
-  const replyNote=isReply && item.replyToNick ? `<div class="replying-to">↳ <strong>${escapeHtml(item.replyToNick)}</strong>님에게 답글</div>` : '';
-  return `<article class="comment-item ${isReply?'reply-item':''}">
-    <div class="comment-head">
-      <div>
-        <div class="comment-nick-public">${escapeHtml(item.nick||'익명')}</div>
-        <div class="comment-topic">${escapeHtml(item.topic||'연봉 이야기')}</div>
-      </div>
-      <div class="comment-time">${escapeHtml(time)}</div>
-    </div>
-    ${replyNote}
-    <div class="comment-body-public">${escapeHtml(item.body||'')}</div>
-    <div class="comment-actions">
-      <button class="comment-action-btn" type="button" onclick="likePublicComment('${item.id}')">👍 ${Number(item.likes)||0}</button>
-      <button class="comment-action-btn" type="button" data-id="${item.id}" data-nick="${escapeHtml(item.nick||'익명')}" onclick="replyToPublicComment(this.dataset.id,this.dataset.nick)">답글</button>
-    </div>
-  </article>`;
-}
-function renderPublicComments(){
-  const listEl=document.getElementById('publicCommentList');
-  if(!listEl)return;
-  const items=loadPublicComments();
-  const topic=currentCommentTopic();
-  const topicItems=items.filter(item=>(item.topic||'실질 연봉')===topic);
-  updateCommentChannelHeader(topic,topicItems.length);
-
-  if(!topicItems.length){
-    listEl.innerHTML='<div class="empty-survey">아직 '+escapeHtml(topic)+' 댓글이 없습니다. 이 주제에 첫 댓글을 남겨보세요.</div>';
+function initSupabaseComments(){
+  const notice=document.getElementById('supabaseSetupNotice');
+  const form=document.getElementById('publicCommentForm');
+  if(!isSupabaseConfigured()){
+    if(notice) notice.style.display='block';
+    if(form) form.querySelectorAll('input,textarea,button').forEach(el=>{el.disabled=true;});
+    renderSupabaseSetupMessage();
     return;
   }
-
-  const roots=topicItems.filter(item=>!item.parentId);
-  const orphanReplies=topicItems.filter(item=>item.parentId && !items.some(root=>String(root.id)===String(item.parentId)));
-  const rootList=roots.concat(orphanReplies.map(item=>({...item,parentId:null,replyToNick:''}))).slice(0,40);
-
-  listEl.innerHTML=rootList.map(root=>{
-    const replies=topicItems
-      .filter(item=>String(item.parentId)===String(root.id))
-      .sort((a,b)=>new Date(a.createdAt)-new Date(b.createdAt));
-    const repliesHtml=replies.length ? `<div class="comment-replies">${replies.map(reply=>renderCommentItem(reply,true)).join('')}</div>` : '';
-    return renderCommentItem(root,false)+repliesHtml;
-  }).join('');
+  if(notice) notice.style.display='none';
+  if(form) form.querySelectorAll('input,textarea,button').forEach(el=>{el.disabled=false;});
+  setCommentTopic(currentCommentTopic,false);
+  loadPublicComments();
+  clearInterval(commentsAutoRefreshTimer);
+  commentsAutoRefreshTimer=setInterval(loadPublicComments,30000);
 }
-function formatRelativeTime(iso){
-  const d=new Date(iso);
-  if(Number.isNaN(d.getTime()))return '방금 전';
-  const diff=Math.max(0,Date.now()-d.getTime());
-  const min=Math.floor(diff/60000);
-  if(min<1)return '방금 전';
-  if(min<60)return min+'분 전';
-  const hr=Math.floor(min/60);
-  if(hr<24)return hr+'시간 전';
-  const day=Math.floor(hr/24);
-  if(day<7)return day+'일 전';
-  return d.toLocaleDateString('ko-KR');
+function renderSupabaseSetupMessage(){
+  const list=document.getElementById('publicCommentList');
+  if(!list) return;
+  list.innerHTML='<div class="comment-error"><strong>Supabase 연결 대기 중</strong><br>index.html의 PAYBLE_SUPABASE_URL, PAYBLE_SUPABASE_ANON_KEY를 실제 값으로 바꾸고, supabase_schema.sql을 실행하면 댓글이 표시됩니다.</div>';
 }
-function escapeHtml(str){
-  return String(str).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function selectCommentTopic(el){
+  const topic=el?.dataset?.v || el?.textContent?.trim() || COMMENT_TOPICS[0];
+  document.querySelectorAll('#commentTopic .chip').forEach(c=>c.classList.remove('selected'));
+  if(el) el.classList.add('selected');
+  setCommentTopic(topic,true);
 }
-function escapeJs(str){
-  return String(str).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');
+function setCommentTopic(topic,reload=true){
+  currentCommentTopic=topic || COMMENT_TOPICS[0];
+  const current=document.getElementById('commentCurrentTopic');
+  const title=document.getElementById('commentChannelTitle');
+  if(current) current.textContent=currentCommentTopic;
+  if(title) title.textContent=currentCommentTopic+' 댓글';
+  cancelReply(false);
+  if(reload) loadPublicComments();
 }
-
+function renderPublicComments(){
+  loadPublicComments();
+}
+function cancelReply(focus=true){
+  replyTarget=null;
+  const n=document.getElementById('replyTargetNotice');
+  if(n){n.style.display='none';n.innerHTML='';}
+  if(focus){
+    const body=document.getElementById('commentBody');
+    if(body) body.focus();
+  }
+}
+function startReply(id,nickname,rootId){
+  replyTarget={id:rootId || id,nickname:nickname || '익명'};
+  const n=document.getElementById('replyTargetNotice');
+  if(n){
+    n.style.display='flex';
+    n.innerHTML='<span><strong>'+escapeHtml(replyTarget.nickname)+'</strong>님 댓글에 답글 작성 중</span><button type="button" onclick="cancelReply()">취소</button>';
+  }
+  const body=document.getElementById('commentBody');
+  if(body){body.focus();body.placeholder=replyTarget.nickname+'님에게 답글을 남겨보세요.';}
+}
+function normalizeCommentText(v,max){
+  return String(v || '').replace(/\s+$/,'').slice(0,max);
+}
+async function submitPublicComment(event){
+  event.preventDefault();
+  const client=getSupabaseClient();
+  if(!client){showToast('Supabase 연결 정보를 먼저 설정해주세요.');return;}
+  const nickEl=document.getElementById('commentNick');
+  const bodyEl=document.getElementById('commentBody');
+  const nickname=normalizeCommentText(nickEl?.value || '익명',24) || '익명';
+  const body=normalizeCommentText(bodyEl?.value,1000);
+  if(body.length<2){showToast('댓글을 2자 이상 입력해주세요.');return;}
+  const payload={
+    topic: currentCommentTopic,
+    nickname,
+    body,
+    parent_id: replyTarget ? replyTarget.id : null,
+    is_hidden:false
+  };
+  const btn=event.target.querySelector('button[type="submit"]');
+  if(btn){btn.disabled=true;btn.textContent='등록 중...';}
+  const {error}=await client.from('payble_comments').insert(payload);
+  if(btn){btn.disabled=false;btn.textContent='댓글 등록 →';}
+  if(error){
+    console.error(error);
+    showToast('댓글 등록에 실패했어요. Supabase 설정을 확인해주세요.');
+    return;
+  }
+  if(bodyEl) bodyEl.value='';
+  cancelReply(false);
+  showToast('댓글이 등록됐어요.');
+  await loadPublicComments();
+}
+async function loadPublicComments(){
+  const list=document.getElementById('publicCommentList');
+  if(!list) return;
+  const client=getSupabaseClient();
+  if(!client){renderSupabaseSetupMessage();return;}
+  list.innerHTML='<div class="comment-loading">댓글을 불러오는 중입니다.</div>';
+  const {data,error}=await client
+    .from('payble_comments')
+    .select('id,topic,nickname,body,parent_id,created_at')
+    .eq('topic',currentCommentTopic)
+    .eq('is_hidden',false)
+    .order('created_at',{ascending:true})
+    .limit(200);
+  if(error){
+    console.error(error);
+    list.innerHTML='<div class="comment-error">댓글을 불러오지 못했습니다.<br>테이블 이름, RLS 정책, Supabase URL/anon key를 확인해주세요.</div>';
+    return;
+  }
+  renderSupabaseComments(data || []);
+}
+function renderSupabaseComments(rows){
+  const list=document.getElementById('publicCommentList');
+  if(!list) return;
+  if(!rows.length){
+    list.innerHTML='<div class="empty-survey">아직 이 주제의 댓글이 없습니다. 첫 댓글을 남겨보세요.</div>';
+    return;
+  }
+  const repliesByParent={};
+  const parents=[];
+  rows.forEach(row=>{
+    if(row.parent_id){
+      if(!repliesByParent[row.parent_id]) repliesByParent[row.parent_id]=[];
+      repliesByParent[row.parent_id].push(row);
+    }else{
+      parents.push(row);
+    }
+  });
+  parents.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  const html=parents.map(parent=>renderCommentItem(parent,repliesByParent[parent.id] || [])).join('');
+  list.innerHTML=html;
+}
+function renderCommentItem(row,replies){
+  const repliesHtml=(replies || [])
+    .sort((a,b)=>new Date(a.created_at)-new Date(b.created_at))
+    .map(reply=>renderReplyItem(reply,row.id))
+    .join('');
+  return '<div class="comment-item" data-id="'+escapeHtml(row.id)+'">'
+    + '<div class="comment-head"><div><div class="comment-nick-public">'+escapeHtml(row.nickname || '익명')+'</div><span class="comment-topic">'+escapeHtml(row.topic || currentCommentTopic)+'</span></div><div class="comment-time">'+timeAgo(row.created_at)+'</div></div>'
+    + '<div class="comment-body-public">'+escapeHtml(row.body || '')+'</div>'
+    + '<div class="comment-actions"><button class="comment-action-btn" type="button" onclick="startReply(\''+escapeJs(row.id)+'\',\''+escapeJs(row.nickname || '익명')+'\',\''+escapeJs(row.id)+'\')">답글</button></div>'
+    + '<div class="comment-replies">'+repliesHtml+'</div>'
+    + '</div>';
+}
+function renderReplyItem(row,rootId){
+  return '<div class="comment-item reply-item" data-id="'+escapeHtml(row.id)+'">'
+    + '<div class="comment-head"><div><div class="comment-nick-public">'+escapeHtml(row.nickname || '익명')+'</div><div class="replying-to">답글</div></div><div class="comment-time">'+timeAgo(row.created_at)+'</div></div>'
+    + '<div class="comment-body-public">'+escapeHtml(row.body || '')+'</div>'
+    + '<div class="comment-actions"><button class="comment-action-btn" type="button" onclick="startReply(\''+escapeJs(row.id)+'\',\''+escapeJs(row.nickname || '익명')+'\',\''+escapeJs(rootId)+'\')">답글</button></div>'
+    + '</div>';
+}
+function fillCommentWithResult(){
+  const body=document.getElementById('commentBody');
+  if(!body) return;
+  let lines=[];
+  if(window._rr){
+    lines.push('[실질 연봉 결과]');
+    lines.push('명목 '+window._rr.base.toLocaleString()+'만원 → 실질 '+window._rr.real.toLocaleString()+'만원');
+    lines.push('등급 '+window._rr.grade+' · '+window._rr.score+'%');
+  }
+  if(window._pr){
+    lines.push('[기대 연봉 결과]');
+    lines.push('직종 '+window._pr.job+' / 중앙값 약 '+window._pr.med.toLocaleString()+'만원');
+    lines.push('범위 '+window._pr.low.toLocaleString()+'~'+window._pr.high.toLocaleString()+'만원');
+  }
+  if(!lines.length){showToast('먼저 연봉 계산을 해주세요.');return;}
+  body.value=(body.value ? body.value+'\n\n' : '')+lines.join('\n');
+  body.focus();
+}
+document.addEventListener('DOMContentLoaded',initSupabaseComments);
 
 // ─── 유틸 ───
 function txt(id,t,c){const e=document.getElementById(id);if(e){e.textContent=t;if(c)e.style.color=c;}}
