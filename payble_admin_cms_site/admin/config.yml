@@ -1,0 +1,125 @@
+backend:
+  name: git-gateway
+  branch: main
+
+local_backend: false
+publish_mode: editorial_workflow
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+locale: "ko"
+
+collections:
+  - name: "settings"
+    label: "Payble 운영자 설정"
+    files:
+      - name: "payble_config"
+        label: "사이트 문구·계산 데이터 관리"
+        file: "data/payble-config.json"
+        fields:
+          - label: "사이트 기본 문구"
+            name: "site"
+            widget: "object"
+            fields:
+              - {label: "브랜드명", name: "brandName", widget: "string"}
+              - {label: "상단 보조 문구", name: "brandSub", widget: "string", required: false}
+              - {label: "브라우저 제목", name: "title", widget: "string"}
+              - {label: "검색 설명", name: "description", widget: "text"}
+              - {label: "SNS 공유 설명", name: "ogDescription", widget: "text", required: false}
+              - {label: "상단 흐르는 문구", name: "ticker", widget: "text"}
+              - {label: "히어로 작은 문구", name: "heroKicker", widget: "string"}
+              - {label: "히어로 제목", name: "heroTitle", widget: "string", hint: "줄바꿈이 필요하면 <br>을 사용하세요."}
+              - {label: "히어로 설명", name: "heroDescription", widget: "text"}
+              - {label: "실질 연봉 출처 문구", name: "realSourceNote", widget: "text"}
+              - {label: "실질 연봉 보조 문구", name: "realMiniNote", widget: "text", required: false}
+              - {label: "기대 연봉 출처 문구", name: "predictSourceNote", widget: "text"}
+              - {label: "기대 연봉 보조 문구", name: "predictMiniNote", widget: "text", required: false}
+              - {label: "하단 문구 HTML", name: "footerHtml", widget: "string"}
+          - label: "급여 데이터"
+            name: "salaryData"
+            widget: "object"
+            fields:
+              - {label: "전국 평균 연봉 기준값(만원)", name: "nationalAvg", widget: "number", value_type: "int"}
+              - {label: "전국 중위 연봉 기준값(만원)", name: "nationalMedian", widget: "number", value_type: "int"}
+              - label: "나이대 기준값"
+                name: "ageOptions"
+                widget: "list"
+                summary: "{{fields.label}} / {{fields.medianAnnualSalary}}만원"
+                fields:
+                  - {label: "키", name: "key", widget: "string", hint: "예: 20l. 기존 키를 바꾸면 저장된 계산 공유 문구와 다르게 보일 수 있습니다."}
+                  - {label: "표시명", name: "label", widget: "string"}
+                  - {label: "동년배 기준 연봉(만원)", name: "medianAnnualSalary", widget: "number", value_type: "int"}
+                  - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}
+              - label: "학력 옵션"
+                name: "educationOptions"
+                widget: "list"
+                summary: "{{fields.label}} × {{fields.value}}"
+                fields:
+                  - {label: "배율값", name: "value", widget: "string"}
+                  - {label: "표시명", name: "label", widget: "string"}
+                  - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}
+              - label: "경력 옵션"
+                name: "careerOptions"
+                widget: "list"
+                summary: "{{fields.label}} × {{fields.value}}"
+                fields:
+                  - {label: "배율값", name: "value", widget: "string"}
+                  - {label: "관리명", name: "label", widget: "string"}
+                  - {label: "실질 연봉 표시명", name: "realLabel", widget: "string"}
+                  - {label: "기대 연봉 표시명", name: "predictLabel", widget: "string", required: false}
+                  - {label: "기대 연봉에서 숨김", name: "hideInPredict", widget: "boolean", required: false, default: false}
+                  - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}
+              - label: "전국 대비 백분위 구간"
+                name: "nationalPercentiles"
+                widget: "list"
+                summary: "{{fields.label}} / {{fields.threshold}}만원 이상"
+                fields:
+                  - {label: "백분위 점수", name: "percentile", widget: "number", value_type: "int"}
+                  - {label: "연봉 기준값(만원 이상)", name: "threshold", widget: "number", value_type: "int"}
+                  - {label: "표시명", name: "label", widget: "string"}
+              - label: "직종 기준값"
+                name: "jobs"
+                widget: "list"
+                summary: "{{fields.label}} / {{fields.baseAnnualSalary}}만원"
+                fields:
+                  - {label: "키", name: "key", widget: "string"}
+                  - {label: "표시명", name: "label", widget: "string"}
+                  - {label: "직종 기준 연봉(만원)", name: "baseAnnualSalary", widget: "number", value_type: "int"}
+                  - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}
+              - label: "회사 규모 기준값"
+                name: "companySizes"
+                widget: "list"
+                summary: "{{fields.label}} / {{fields.anchorAnnualSalary}}만원"
+                fields:
+                  - {label: "값", name: "value", widget: "string"}
+                  - {label: "표시명", name: "label", widget: "string"}
+                  - {label: "회사규모 기준 연봉(만원)", name: "anchorAnnualSalary", widget: "number", value_type: "int"}
+                  - {label: "산출 근거 메모", name: "note", widget: "text", required: false}
+                  - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}
+          - label: "실질 연봉 보정 항목"
+            name: "realAdjustments"
+            widget: "list"
+            summary: "{{fields.stepLabel}}"
+            fields:
+              - {label: "항목 ID", name: "id", widget: "string", hint: "기존 ID를 유지하세요. cWt, cOt, cOp, cCm, cSt, cMeal, cTrans, cBn, cSb, cIc"}
+              - {label: "산출표 표시명", name: "label", widget: "string"}
+              - {label: "화면 단계명", name: "stepLabel", widget: "string"}
+              - {label: "설명 메모", name: "note", widget: "text", required: false}
+              - {label: "사용함", name: "enabled", widget: "boolean", default: true}
+              - label: "선택지"
+                name: "options"
+                widget: "list"
+                summary: "{{fields.label}} / {{fields.value}}만원"
+                fields:
+                  - {label: "보정값(만원)", name: "value", widget: "string"}
+                  - {label: "표시명", name: "label", widget: "string"}
+                  - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}
+          - label: "댓글 주제"
+            name: "commentTopics"
+            widget: "list"
+            summary: "{{fields.label}}"
+            fields:
+              - {label: "키", name: "key", widget: "string"}
+              - {label: "표시명", name: "label", widget: "string"}
+              - {label: "기본 선택", name: "selected", widget: "boolean", required: false, default: false}

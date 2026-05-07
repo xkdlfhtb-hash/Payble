@@ -1,0 +1,670 @@
+{
+  "site": {
+    "brandName": "Payble",
+    "brandSub": "Salary & Choice Board",
+    "title": "Payble — 실질 연봉과 기대 연봉 계산기",
+    "description": "Payble은 실질 연봉 계산기와 기대 연봉 예측기를 제공하고, 사용자 피드백과 댓글로 산출 방식을 개선하는 연봉 비교 도구입니다.",
+    "ogDescription": "실질 연봉과 기대 연봉을 계산하고, 피드백과 댓글로 결과의 현실성을 함께 점검해보세요.",
+    "ticker": "💰 실질 연봉 등급 계산기  ·  📊 기대 연봉 현실 보정 모델  ·  📝 신뢰도 피드백 오픈  ·  💬 연봉 계산 결과를 자유롭게 이야기해보세요  ·",
+    "heroKicker": "💼 SALARY CHECK",
+    "heroTitle": "내 연봉, 현실적으로<br>어느 정도일까?",
+    "heroDescription": "실질 연봉 등급과 기대 연봉 범위를 확인하고, 결과가 얼마나 현실적인지 피드백을 보내거나 댓글로 자유롭게 의견을 나눠보세요. Payble은 사용자 반응을 바탕으로 산출 방식을 계속 다듬는 연봉 비교 도구입니다.",
+    "realSourceNote": "📊 데이터 기준: 국가데이터처 「2024 임금근로일자리 소득(보수) 결과」(2026.02 공표) · 고용노동부 「2025년 6월 고용형태별근로실태조사」(2026.04 공표) · 고용노동통계/KOSIS 임금·근로시간 표",
+    "realMiniNote": "최신 반영: 2024년 임금근로일자리 평균소득 월 375만원·중위소득 월 288만원을 기준으로, 연령·근속·기업규모·산업별 평균소득을 업데이트했습니다. 기대 연봉은 2025년 6월 시간당 임금총액 증가율(+2.7%)을 보정 반영합니다.",
+    "predictSourceNote": "📊 데이터 기준: 국가데이터처 「2024 임금근로일자리 소득(보수) 결과」 산업·기업규모별 평균소득 · 고용노동부 「2025년 6월 고용형태별근로실태조사」 임금상승률(+2.7%)",
+    "predictMiniNote": "직종 기준값은 공식 산업대분류 임금 데이터를 Payble 직종군에 매핑한 값입니다. 실제 직무·성과급·스톡옵션·회사 예산에 따라 달라질 수 있어, 결과는 협상 기준 범위로 보세요.",
+    "footerHtml": "© 2026 Payble · 광고문의: admin@payble.kr · 신고하기"
+  },
+  "salaryData": {
+    "nationalAvg": 4622,
+    "nationalMedian": 3549,
+    "ageOptions": [
+      {
+        "key": "20e",
+        "label": "20대 초반",
+        "medianAnnualSalary": 3000
+      },
+      {
+        "key": "20l",
+        "label": "20대 후반",
+        "medianAnnualSalary": 3600,
+        "selected": true
+      },
+      {
+        "key": "30e",
+        "label": "30대 초반",
+        "medianAnnualSalary": 4440
+      },
+      {
+        "key": "30l",
+        "label": "30대 후반",
+        "medianAnnualSalary": 5040
+      },
+      {
+        "key": "40e",
+        "label": "40대 초반",
+        "medianAnnualSalary": 5520
+      },
+      {
+        "key": "40l",
+        "label": "40대 후반",
+        "medianAnnualSalary": 5760
+      },
+      {
+        "key": "50e",
+        "label": "50대 초반",
+        "medianAnnualSalary": 5520
+      },
+      {
+        "key": "50l",
+        "label": "50대 후반",
+        "medianAnnualSalary": 5160
+      },
+      {
+        "key": "60p",
+        "label": "60대 이상",
+        "medianAnnualSalary": 3516
+      }
+    ],
+    "educationOptions": [
+      {
+        "value": "0.82",
+        "label": "중졸 이하"
+      },
+      {
+        "value": "1.00",
+        "label": "고졸"
+      },
+      {
+        "value": "1.12",
+        "label": "전문대졸",
+        "selected": true
+      },
+      {
+        "value": "1.34",
+        "label": "4년제 대졸"
+      },
+      {
+        "value": "1.52",
+        "label": "대학원 석사"
+      },
+      {
+        "value": "1.80",
+        "label": "대학원 박사"
+      }
+    ],
+    "careerOptions": [
+      {
+        "value": "0.70",
+        "label": "1년 미만",
+        "realLabel": "1년 미만",
+        "predictLabel": "신입 (1년 미만)"
+      },
+      {
+        "value": "0.88",
+        "label": "1~3년",
+        "realLabel": "1~3년",
+        "predictLabel": "1~3년"
+      },
+      {
+        "value": "1.00",
+        "label": "3~7년",
+        "realLabel": "3~7년",
+        "predictLabel": "3~7년",
+        "selected": true
+      },
+      {
+        "value": "1.14",
+        "label": "7~10년",
+        "realLabel": "7~10년",
+        "predictLabel": "7~10년"
+      },
+      {
+        "value": "1.38",
+        "label": "10~15년",
+        "realLabel": "10~15년",
+        "predictLabel": "10~15년"
+      },
+      {
+        "value": "1.52",
+        "label": "15~20년",
+        "realLabel": "15~20년",
+        "hideInPredict": true
+      },
+      {
+        "value": "1.60",
+        "label": "15년 이상",
+        "realLabel": "15년 이상",
+        "predictLabel": "15년 이상"
+      },
+      {
+        "value": "1.75",
+        "label": "20년 이상",
+        "realLabel": "20년 이상",
+        "hideInPredict": true
+      }
+    ],
+    "nationalPercentiles": [
+      {
+        "percentile": 96,
+        "threshold": 12000,
+        "label": "상위 약 4%"
+      },
+      {
+        "percentile": 92,
+        "threshold": 9600,
+        "label": "상위 약 8%"
+      },
+      {
+        "percentile": 86,
+        "threshold": 7800,
+        "label": "상위 약 14%"
+      },
+      {
+        "percentile": 81,
+        "threshold": 6600,
+        "label": "상위 약 19%"
+      },
+      {
+        "percentile": 73,
+        "threshold": 5400,
+        "label": "상위 약 27%"
+      },
+      {
+        "percentile": 62,
+        "threshold": 4200,
+        "label": "상위 약 38%"
+      },
+      {
+        "percentile": 50,
+        "threshold": 3456,
+        "label": "중위권(월 288만원 기준)"
+      },
+      {
+        "percentile": 42,
+        "threshold": 3000,
+        "label": "중위권 이하"
+      },
+      {
+        "percentile": 21,
+        "threshold": 1800,
+        "label": "하위 약 21%"
+      },
+      {
+        "percentile": 12,
+        "threshold": 1020,
+        "label": "하위 약 12%"
+      }
+    ],
+    "jobs": [
+      {
+        "key": "dev",
+        "label": "개발·엔지니어링",
+        "baseAnnualSalary": 6372
+      },
+      {
+        "key": "data",
+        "label": "데이터·AI",
+        "baseAnnualSalary": 6200
+      },
+      {
+        "key": "security",
+        "label": "정보보안",
+        "baseAnnualSalary": 6372
+      },
+      {
+        "key": "pm",
+        "label": "기획·PM",
+        "baseAnnualSalary": 5509
+      },
+      {
+        "key": "design",
+        "label": "디자인·UX",
+        "baseAnnualSalary": 4570
+      },
+      {
+        "key": "content",
+        "label": "콘텐츠·미디어",
+        "baseAnnualSalary": 4100
+      },
+      {
+        "key": "finance",
+        "label": "금융·보험",
+        "baseAnnualSalary": 9576
+      },
+      {
+        "key": "accounting",
+        "label": "회계·세무",
+        "baseAnnualSalary": 5509
+      },
+      {
+        "key": "legal",
+        "label": "법률·노무",
+        "baseAnnualSalary": 5509
+      },
+      {
+        "key": "mfg",
+        "label": "제조·생산",
+        "baseAnnualSalary": 6014
+      },
+      {
+        "key": "rnd",
+        "label": "연구개발·R&D",
+        "baseAnnualSalary": 6100
+      },
+      {
+        "key": "construction",
+        "label": "건설·토목",
+        "baseAnnualSalary": 3993
+      },
+      {
+        "key": "logistics",
+        "label": "물류·유통",
+        "baseAnnualSalary": 4375
+      },
+      {
+        "key": "sales",
+        "label": "영업",
+        "baseAnnualSalary": 4042
+      },
+      {
+        "key": "marketing",
+        "label": "마케팅·브랜딩",
+        "baseAnnualSalary": 4042
+      },
+      {
+        "key": "hr",
+        "label": "인사·총무",
+        "baseAnnualSalary": 4200
+      },
+      {
+        "key": "admin",
+        "label": "사무·경영지원",
+        "baseAnnualSalary": 3900
+      },
+      {
+        "key": "health",
+        "label": "의료·보건",
+        "baseAnnualSalary": 3401
+      },
+      {
+        "key": "bio",
+        "label": "제약·바이오",
+        "baseAnnualSalary": 6100
+      },
+      {
+        "key": "edu",
+        "label": "교육",
+        "baseAnnualSalary": 5151
+      },
+      {
+        "key": "public",
+        "label": "공공·행정",
+        "baseAnnualSalary": 5299
+      },
+      {
+        "key": "service",
+        "label": "서비스·요식",
+        "baseAnnualSalary": 2317
+      },
+      {
+        "key": "trade",
+        "label": "무역·해외영업",
+        "baseAnnualSalary": 4042
+      },
+      {
+        "key": "other",
+        "label": "기타·전문직",
+        "baseAnnualSalary": 4622,
+        "selected": true
+      }
+    ],
+    "companySizes": [
+      {
+        "value": "1.00",
+        "label": "중소기업 (300인 미만)",
+        "anchorAnnualSalary": 3783,
+        "selected": true,
+        "note": "중소기업 2024 월 307만원×12에 2025 임금상승률 보정"
+      },
+      {
+        "value": "1.25",
+        "label": "중견기업 (300~999인)",
+        "anchorAnnualSalary": 6051,
+        "note": "중견·300인 이상 기준 보정"
+      },
+      {
+        "value": "1.65",
+        "label": "대기업 (1000인 이상)",
+        "anchorAnnualSalary": 7555,
+        "note": "대기업 2024 월 613만원×12에 2025 임금상승률 보정"
+      },
+      {
+        "value": "1.30",
+        "label": "공기업·공공기관",
+        "anchorAnnualSalary": 4400,
+        "note": "비영리·공공 성격 조직 기준 보정"
+      },
+      {
+        "value": "1.10",
+        "label": "스타트업",
+        "anchorAnnualSalary": 4300,
+        "note": "중소기업 평균에 직무 프리미엄 일부 반영"
+      }
+    ]
+  },
+  "realAdjustments": [
+    {
+      "id": "cWt",
+      "label": "근무 형태",
+      "stepLabel": "⑤ 근무 형태",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "일반 주5일",
+          "selected": true
+        },
+        {
+          "value": "-600",
+          "label": "2교대 근무"
+        },
+        {
+          "value": "-1000",
+          "label": "3교대 근무"
+        },
+        {
+          "value": "-400",
+          "label": "주6일 근무"
+        },
+        {
+          "value": "300",
+          "label": "재택·하이브리드"
+        }
+      ]
+    },
+    {
+      "id": "cOt",
+      "label": "야근 강도",
+      "stepLabel": "⑥ 주당 평균 야근 시간",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "거의 없음",
+          "selected": true
+        },
+        {
+          "value": "-200",
+          "label": "주 1~2시간"
+        },
+        {
+          "value": "-500",
+          "label": "주 3~5시간"
+        },
+        {
+          "value": "-900",
+          "label": "주 6~10시간"
+        },
+        {
+          "value": "-1600",
+          "label": "주 10시간↑"
+        }
+      ]
+    },
+    {
+      "id": "cOp",
+      "label": "야근수당",
+      "stepLabel": "⑦ 야근수당 지급",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "야근 없음",
+          "selected": true
+        },
+        {
+          "value": "200",
+          "label": "전액 지급"
+        },
+        {
+          "value": "-100",
+          "label": "일부만 지급"
+        },
+        {
+          "value": "-400",
+          "label": "미지급 (공짜 야근)"
+        }
+      ]
+    },
+    {
+      "id": "cCm",
+      "label": "통근 부담",
+      "stepLabel": "⑧ 편도 통근 시간",
+      "enabled": true,
+      "options": [
+        {
+          "value": "400",
+          "label": "30분 이하",
+          "selected": true
+        },
+        {
+          "value": "200",
+          "label": "30분~1시간"
+        },
+        {
+          "value": "0",
+          "label": "1~1.5시간"
+        },
+        {
+          "value": "-400",
+          "label": "1.5~2시간"
+        },
+        {
+          "value": "-800",
+          "label": "2시간 이상"
+        }
+      ]
+    },
+    {
+      "id": "cSt",
+      "label": "업무 스트레스",
+      "stepLabel": "⑨ 업무 스트레스 강도",
+      "enabled": true,
+      "options": [
+        {
+          "value": "500",
+          "label": "매우 낮음",
+          "selected": true
+        },
+        {
+          "value": "200",
+          "label": "낮은 편"
+        },
+        {
+          "value": "0",
+          "label": "보통"
+        },
+        {
+          "value": "-500",
+          "label": "높은 편"
+        },
+        {
+          "value": "-1000",
+          "label": "지옥 수준"
+        }
+      ]
+    },
+    {
+      "id": "cMeal",
+      "label": "식대 지원",
+      "stepLabel": "⑩ 식대 지원",
+      "note": "연간 환산 보정: 월 지원액을 기준으로 대략적인 체감 연봉에 반영",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "없음",
+          "selected": true
+        },
+        {
+          "value": "120",
+          "label": "월 10만원 이하"
+        },
+        {
+          "value": "240",
+          "label": "월 10~20만원"
+        },
+        {
+          "value": "360",
+          "label": "월 20만원 이상"
+        },
+        {
+          "value": "200",
+          "label": "사내식당·식권"
+        }
+      ]
+    },
+    {
+      "id": "cTrans",
+      "label": "교통비 지원",
+      "stepLabel": "⑪ 교통비 지원",
+      "note": "대중교통·주차·유류비 지원을 연간 체감 금액으로 환산",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "없음",
+          "selected": true
+        },
+        {
+          "value": "60",
+          "label": "월 5만원 이하"
+        },
+        {
+          "value": "120",
+          "label": "월 5~10만원"
+        },
+        {
+          "value": "200",
+          "label": "월 10만원 이상"
+        },
+        {
+          "value": "300",
+          "label": "유류비·주차 지원"
+        }
+      ]
+    },
+    {
+      "id": "cBn",
+      "label": "기타 복리후생",
+      "stepLabel": "⑫ 기타 복리후생 수준",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "기본만 있음",
+          "selected": true
+        },
+        {
+          "value": "250",
+          "label": "복지포인트"
+        },
+        {
+          "value": "300",
+          "label": "건강검진·보험"
+        },
+        {
+          "value": "350",
+          "label": "교육·자기계발"
+        },
+        {
+          "value": "600",
+          "label": "선택적 복지 풍부"
+        },
+        {
+          "value": "900",
+          "label": "대기업급 풀패키지"
+        }
+      ]
+    },
+    {
+      "id": "cSb",
+      "label": "고용 안정성",
+      "stepLabel": "⑬ 고용 안정성",
+      "note": "국가데이터처 2024: 대기업 평균 7,356만원 vs 중소기업 3,684만원",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "계약직·프리랜서",
+          "selected": true
+        },
+        {
+          "value": "300",
+          "label": "중소기업 정규직"
+        },
+        {
+          "value": "600",
+          "label": "중견기업 정규직"
+        },
+        {
+          "value": "900",
+          "label": "대기업·공기업"
+        }
+      ]
+    },
+    {
+      "id": "cIc",
+      "label": "성과급",
+      "stepLabel": "⑭ 성과급·인센티브",
+      "enabled": true,
+      "options": [
+        {
+          "value": "0",
+          "label": "없음",
+          "selected": true
+        },
+        {
+          "value": "100",
+          "label": "100만원 이하"
+        },
+        {
+          "value": "300",
+          "label": "월급 1개월치"
+        },
+        {
+          "value": "600",
+          "label": "월급 3개월치↑"
+        },
+        {
+          "value": "1200",
+          "label": "억대 인센티브"
+        }
+      ]
+    }
+  ],
+  "commentTopics": [
+    {
+      "key": "real",
+      "label": "실질 연봉",
+      "selected": true
+    },
+    {
+      "key": "predict",
+      "label": "기대 연봉"
+    },
+    {
+      "key": "career",
+      "label": "이직 고민"
+    },
+    {
+      "key": "nego",
+      "label": "연봉 협상"
+    },
+    {
+      "key": "question",
+      "label": "질문"
+    }
+  ]
+}
