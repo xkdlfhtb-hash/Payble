@@ -1071,7 +1071,7 @@ function initSupabaseComments(){
   setCommentTopic(currentCommentTopic,false);
   loadPublicComments();
   clearInterval(commentsAutoRefreshTimer);
-  commentsAutoRefreshTimer=setInterval(loadPublicComments,30000);
+  commentsAutoRefreshTimer=setInterval(loadPublicComments,10000);
 }
 function renderSupabaseSetupMessage(){
   const list=document.getElementById('publicCommentList');
@@ -1118,6 +1118,33 @@ function startReply(id,nickname,rootId){
 function normalizeCommentText(v,max){
   return String(v || '').replace(/\s+$/,'').slice(0,max);
 }
+
+function escapeHtml(value){
+  return String(value ?? '').replace(/[&<>"']/g,function(ch){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+  });
+}
+function escapeJs(value){
+  return String(value ?? '')
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/\r?\n/g,'\\n')
+    .replace(/</g,'\\x3C')
+    .replace(/>/g,'\\x3E');
+}
+function timeAgo(value){
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime())) return '';
+  const sec=Math.max(0,Math.floor((Date.now()-d.getTime())/1000));
+  if(sec<60) return '방금 전';
+  const min=Math.floor(sec/60);
+  if(min<60) return min+'분 전';
+  const hr=Math.floor(min/60);
+  if(hr<24) return hr+'시간 전';
+  const day=Math.floor(hr/24);
+  if(day<7) return day+'일 전';
+  return d.toLocaleDateString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit'});
+}
 async function submitPublicComment(event){
   event.preventDefault();
   const client=getSupabaseClient();
@@ -1139,8 +1166,8 @@ async function submitPublicComment(event){
   const {error}=await client.from('payble_comments').insert(payload);
   if(btn){btn.disabled=false;btn.textContent='댓글 등록 →';}
   if(error){
-    console.error(error);
-    showToast('댓글 등록에 실패했어요. Supabase 설정을 확인해주세요.');
+    console.error('Payble comment insert error:', error);
+    showToast('댓글 등록 실패: '+(error.message || 'Supabase 설정을 확인해주세요.'));
     return;
   }
   if(bodyEl) bodyEl.value='';
@@ -1162,11 +1189,16 @@ async function loadPublicComments(){
     .order('created_at',{ascending:true})
     .limit(200);
   if(error){
-    console.error(error);
-    list.innerHTML='<div class="comment-error">댓글을 불러오지 못했습니다.<br>테이블 이름, RLS 정책, Supabase URL/anon key를 확인해주세요.</div>';
+    console.error('Payble comment load error:', error);
+    list.innerHTML='<div class="comment-error"><strong>댓글을 불러오지 못했습니다.</strong><br>Supabase의 payble_comments 테이블, RLS 정책, URL/key를 확인해주세요.<br><span style="font-size:11px;color:#98a2b3">오류: '+escapeHtml(error.message || error.code || 'unknown')+'</span></div>';
     return;
   }
-  renderSupabaseComments(data || []);
+  try{
+    renderSupabaseComments(data || []);
+  }catch(e){
+    console.error('Payble comment render error:', e);
+    list.innerHTML='<div class="comment-error"><strong>댓글 표시 중 오류가 발생했습니다.</strong><br>페이지를 새로고침하거나 잠시 후 다시 시도해주세요.<br><span style="font-size:11px;color:#98a2b3">오류: '+escapeHtml(e.message || 'unknown')+'</span></div>';
+  }
 }
 function renderSupabaseComments(rows){
   const list=document.getElementById('publicCommentList');
