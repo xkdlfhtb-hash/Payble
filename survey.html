@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payble Survey — 무료 설문 제작</title>
+<meta name="description" content="누구나 무료로 설문을 만들고 공유할 수 있는 Payble Survey. 질문 항목 추가·삭제, 조건 연결/해제, 응답 관리와 CSV 다운로드를 지원합니다.">
+<meta name="theme-color" content="#F7F8FC">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--blue:#4f7cff;--green:#12a150;--red:#ef4444;--yellow:#ffd95a;--bg:#f7f8fc;--surface:#fff;--border:#e6e9f2;--text:#1f2937;--muted:#6b7280;--shadow:0 12px 30px rgba(50,70,120,.08);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(180deg,#fbfcff 0%,#f4f7fb 100%);color:var(--text);min-height:100vh;letter-spacing:-.015em}
+header{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);box-shadow:0 6px 24px rgba(31,41,55,.05);padding:16px 18px}
+.head-wrap{max-width:1040px;margin:0 auto;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.logo{font-weight:900;font-size:25px;letter-spacing:-.05em;color:#111827;text-decoration:none}.logo span{color:var(--blue)}
+.head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.head-actions a,.pill-btn{border:1px solid #d9dfed;background:#fff;color:#667085;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;text-decoration:none;cursor:pointer;font-family:inherit}
+.head-actions a:hover,.pill-btn:hover{background:#f7f9fc;color:#111827}
+.container{max-width:1040px;margin:0 auto;padding:24px 16px 60px}
+.hero{background:radial-gradient(circle at 20% 0%,rgba(255,217,90,.30),transparent 34%),linear-gradient(135deg,#ffffff,#f4f7ff);border:1px solid #e3e8f5;border-radius:22px;padding:24px 22px;box-shadow:var(--shadow);margin-bottom:18px}
+.kicker{display:inline-flex;background:#111827;color:#fff;border-radius:999px;padding:6px 10px;font-size:11px;font-weight:900;margin-bottom:12px}
+h1{font-size:32px;line-height:1.18;letter-spacing:-.06em;margin-bottom:10px}.hero p{color:var(--muted);font-size:14px;line-height:1.8;max-width:780px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.tab{border:1px solid #d9dfed;background:#fff;color:#667085;border-radius:999px;padding:10px 14px;font-size:13px;font-weight:850;cursor:pointer;font-family:inherit}.tab.active{background:#111827;color:#fff;border-color:#111827}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start}.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow);margin-bottom:16px}
+.card-title{font-size:20px;font-weight:900;letter-spacing:-.045em;margin-bottom:6px}.card-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}label{font-size:12px;font-weight:850;color:var(--muted)}
+input,textarea,select{width:100%;border:1px solid #d9dfed;border-radius:12px;background:#fff;color:var(--text);padding:11px 13px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s}textarea{resize:vertical;line-height:1.65}input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(79,124,255,.12)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:900;font-family:inherit;cursor:pointer;background:#111827;color:#fff}.btn.blue{background:var(--blue)}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.ghost{background:#fff;color:#667085;border:1px solid #d9dfed}.btn.small{font-size:12px;padding:8px 10px;border-radius:10px}.btn:active{transform:scale(.99)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.notice{padding:12px 14px;background:#fff;border:1px dashed #d7dfef;border-radius:13px;color:var(--muted);font-size:12px;line-height:1.7;margin:12px 0}.notice strong{color:#111827}
+.auth-card{background:linear-gradient(135deg,#ffffff,#f8fbff)}.auth-status{font-size:12px;color:#667085;line-height:1.6}.auth-status strong{color:#2563eb}
+.hidden{display:none!important}.question-card{border:1px solid #e1e8fb;background:#fbfcff;border-radius:16px;padding:14px;margin-bottom:12px}.q-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.q-title{font-size:14px;font-weight:900;color:#111827}.q-type{display:inline-flex;margin-top:4px;border-radius:999px;background:#eef4ff;color:#2563eb;border:1px solid #dbe7ff;padding:3px 8px;font-size:11px;font-weight:800}.q-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.option-list{display:flex;flex-direction:column;gap:7px}.option-row{display:grid;grid-template-columns:1fr auto;gap:6px}
+.logic-box{margin-top:10px;background:#fff;border:1px dashed #d7dfef;border-radius:12px;padding:12px}.logic-title{font-size:12px;font-weight:900;color:#2563eb;margin-bottom:8px}
+.preview-card{position:sticky;top:78px}.preview-title{font-size:18px;font-weight:900;margin-bottom:4px}.preview-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px}.answer-q{border:1px solid #e1e8fb;background:#fff;border-radius:14px;padding:13px;margin-bottom:10px}.answer-q-title{font-size:14px;font-weight:900;margin-bottom:6px}.answer-q-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}.inline-option{display:flex;gap:7px;align-items:center;font-size:13px;margin:7px 0}.inline-option input{width:auto}
+.link-box{background:#f8faff;border:1px solid #e1e8fb;border-radius:12px;padding:12px;font-size:12px;line-height:1.7;word-break:break-all}.result-box{display:none;margin-top:12px;padding:14px;background:#f8faff;border:1px solid #e1e8fb;border-radius:12px;font-size:13px;line-height:1.65}.result-box.show{display:block}
+.empty{padding:18px;border:1px dashed #ccd5e7;border-radius:12px;color:var(--muted);font-size:13px;line-height:1.6;text-align:center;background:#fbfcff}.table-wrap{overflow:auto;border:1px solid #e1e8fb;border-radius:12px;margin-top:12px}table{width:100%;border-collapse:collapse;background:#fff;font-size:12px}th,td{padding:10px;border-bottom:1px solid #eef2fb;text-align:left;vertical-align:top}th{background:#f8faff;color:#667085;white-space:nowrap}.survey-item{background:#fff;border:1px solid #e1e8fb;border-radius:14px;padding:14px;margin-bottom:10px}.survey-item-title{font-weight:900;margin-bottom:4px}.survey-item-meta{font-size:12px;color:#98a2b3;line-height:1.6;margin-bottom:10px}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;background:#111827;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:800;box-shadow:0 12px 30px rgba(17,24,39,.22);transition:all .25s;z-index:300}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.footer{text-align:center;padding:30px 16px;color:#98a2b3;font-size:12px}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.preview-card{position:static}.row{grid-template-columns:1fr}.head-wrap{align-items:flex-start;flex-direction:column}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="head-wrap">
+    <a class="logo" href="index.html">Pay<span>ble</span> Survey</a>
+    <div class="head-actions">
+      <a href="index.html">연봉 계산기로 돌아가기</a>
+      <button class="pill-btn" onclick="switchMode('builder')">설문 만들기</button>
+      <button class="pill-btn" onclick="switchMode('mine')">내 설문</button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="kicker">FREE SURVEY BUILDER</div>
+    <h1>누구나 무료로 설문을 만들고<br>응답을 관리할 수 있어요</h1>
+    <p>구글폼보다 가볍게 시작하고, 질문 항목의 조건 연결과 해제를 자유롭게 설정할 수 있는 설문 제작 도구입니다. 설문 작성자는 로그인 후 자기 설문만 관리하고, 응답자는 로그인 없이 링크로 참여합니다.</p>
+  </section>
+
+  <section class="card auth-card">
+    <div class="card-title">작성자 로그인</div>
+    <div class="card-desc">설문 생성·수정·응답 확인은 작성자 계정으로 관리됩니다. 응답자는 로그인 없이 설문에 참여할 수 있습니다.</div>
+    <div id="authLoggedOut">
+      <div class="row">
+        <div class="field"><label>이메일</label><input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="field"><label>비밀번호</label><input id="authPassword" type="password" placeholder="8자 이상 권장" autocomplete="current-password"></div>
+      </div>
+      <div class="actions">
+        <button class="btn blue" onclick="signIn()">로그인</button>
+        <button class="btn ghost" onclick="signUp()">회원가입</button>
+      </div>
+      <div class="notice">회원가입 후 이메일 확인이 필요한 설정이라면, 받은 메일의 확인 링크를 누른 뒤 로그인하세요.</div>
+    </div>
+    <div id="authLoggedIn" class="hidden">
+      <div class="auth-status">현재 <strong id="authUserEmail"></strong> 계정으로 로그인 중입니다.</div>
+      <div class="actions">
+        <button class="btn ghost" onclick="signOut()">로그아웃</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="tabs">
+    <button class="tab active" id="tabBuilder" onclick="switchMode('builder')">설문 만들기</button>
+    <button class="tab" id="tabAnswer" onclick="switchMode('answer')">응답하기</button>
+    <button class="tab" id="tabMine" onclick="switchMode('mine')">내 설문</button>
+  </div>
+
+  <section id="builderMode">
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div class="card-title">설문 기본 정보</div>
+          <div class="field"><label for="surveyTitle">설문 제목</label><input id="surveyTitle" placeholder="예: 이용자 만족도 조사"></div>
+          <div class="field"><label for="surveyDesc">설문 설명</label><textarea id="surveyDesc" rows="3" placeholder="설문 목적, 소요 시간, 개인정보 주의사항 등을 적어주세요."></textarea></div>
+          <div class="actions">
+            <button class="btn ghost small" onclick="addQuestion('short')">단답형</button>
+            <button class="btn ghost small" onclick="addQuestion('long')">장문형</button>
+            <button class="btn ghost small" onclick="addQuestion('radio')">객관식</button>
+            <button class="btn ghost small" onclick="addQuestion('checkbox')">체크박스</button>
+            <button class="btn ghost small" onclick="addQuestion('select')">드롭다운</button>
+            <button class="btn ghost small" onclick="addQuestion('scale')">척도형</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">질문 항목</div>
+          <div class="card-desc">질문별로 필수 여부, 선택지, 조건 연결을 설정할 수 있습니다.</div>
+          <div id="emptyQuestions" class="empty">아직 질문이 없습니다. 위 버튼으로 질문을 추가해보세요.</div>
+          <div id="questionList"></div>
+          <div class="actions">
+            <button class="btn blue" onclick="saveSurvey()">설문 저장 / 업데이트</button>
+            <button class="btn ghost" onclick="resetBuilder()">새 설문 작성</button>
+            <button class="btn ghost" onclick="exportSurveyJson()">JSON 백업</button>
+            <label class="btn ghost" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">JSON 불러오기<input type="file" accept="application/json" onchange="importSurveyJson(event)" hidden></label>
+          </div>
+          <div id="saveResult" class="result-box"></div>
+        </div>
+      </div>
+
+      <aside class="card preview-card">
+        <div class="card-title">실시간 미리보기</div>
+        <div id="previewArea"></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="answerMode" class="hidden">
+    <div class="card">
+      <div class="card-title">설문 응답</div>
+      <div class="card-desc">공유받은 설문 링크로 들어오면 자동으로 설문이 표시됩니다. 설문 ID를 직접 입력해도 됩니다.</div>
+      <div class="field"><label for="answerSurveyId">설문 ID</label><input id="answerSurveyId" placeholder="공유 링크의 survey 값"></div>
+      <div class="actions"><button class="btn blue" onclick="loadSurveyFromInput()">설문 불러오기</button></div>
+      <div class="notice">익명 응답에는 개인정보, 연락처, 회사 실명 등 민감한 정보를 입력하지 않는 것이 좋습니다.</div>
+      <div id="answerResult" class="result-box"></div>
+    </div>
+    <div class="card">
+      <div class="preview-title" id="answerTitle">설문을 불러와주세요</div>
+      <div class="preview-desc" id="answerDesc">공유 링크 또는 설문 ID로 응답할 수 있습니다.</div>
+      <div id="answerArea"></div>
+      <button class="btn green hidden" id="submitAnswerBtn" onclick="submitAnswer()">응답 제출</button>
+    </div>
+  </section>
+
+  <section id="mineMode" class="hidden">
+    <div class="card">
+      <div class="card-title">내 설문</div>
+      <div class="card-desc">로그인한 계정으로 만든 설문만 표시됩니다. 응답 확인과 CSV 다운로드도 본인 설문에서만 가능합니다.</div>
+      <div class="actions"><button class="btn blue" onclick="loadMySurveys()">내 설문 새로고침</button></div>
+      <div id="mySurveyList" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">응답 확인</div>
+      <div id="manageResult" class="result-box"></div>
+      <div id="responseTable"></div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+<div class="footer">© 2026 Payble Survey · 무료 공개용 설문 제작 도구</div>
+
+<script>
+const SUPABASE_URL='https://fdreoifplrzirmwyuwdc.supabase.co';
+const SUPABASE_KEY='sb_publishable_XTwXCBTfm3CPeW4aEit54g_YGxQwh5o';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let survey = { id: null, title: '', description: '', questions: [] };
+let currentSurveyForAnswer = null;
+let loadedResponses = [];
+let currentUser = null;
+
+function uid(){return 'q_'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function escapeHtml(v){return String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+function jsStr(v){return String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
+
+async function refreshAuth(){
+  const {data:{user}}=await db.auth.getUser();
+  currentUser=user;
+  document.getElementById('authLoggedOut').classList.toggle('hidden', !!user);
+  document.getElementById('authLoggedIn').classList.toggle('hidden', !user);
+  if(user) document.getElementById('authUserEmail').textContent=user.email || user.id;
+}
+async function signUp(){
+  const email=document.getElementById('authEmail').value.trim();
+  const password=document.getElementById('authPassword').value;
+  if(!email||!password) return toast('이메일과 비밀번호를 입력해주세요.');
+  const {error}=await db.auth.signUp({email,password});
+  if(error) return toast('회원가입 실패: '+error.message);
+  toast('회원가입 요청이 완료됐습니다. 이메일 확인이 필요할 수 있어요.');
+  await refreshAuth();
+}
+async function signIn(){
+  const email=document.getElementById('authEmail').value.trim();
+  const password=document.getElementById('authPassword').value;
+  if(!email||!password) return toast('이메일과 비밀번호를 입력해주세요.');
+  const {error}=await db.auth.signInWithPassword({email,password});
+  if(error) return toast('로그인 실패: '+error.message);
+  toast('로그인되었습니다.');
+  await refreshAuth();
+  loadMySurveys();
+}
+async function signOut(){await db.auth.signOut(); currentUser=null; toast('로그아웃되었습니다.'); await refreshAuth();}
+
+function switchMode(mode){
+  document.getElementById('builderMode').classList.toggle('hidden',mode!=='builder');
+  document.getElementById('answerMode').classList.toggle('hidden',mode!=='answer');
+  document.getElementById('mineMode').classList.toggle('hidden',mode!=='mine');
+  document.getElementById('tabBuilder').classList.toggle('active',mode==='builder');
+  document.getElementById('tabAnswer').classList.toggle('active',mode==='answer');
+  document.getElementById('tabMine').classList.toggle('active',mode==='mine');
+  if(mode==='answer'&&!currentSurveyForAnswer) loadSurveyFromUrl();
+  if(mode==='mine') loadMySurveys();
+}
+function typeLabel(type){return {short:'단답형',long:'장문형',radio:'객관식',checkbox:'체크박스',select:'드롭다운',scale:'척도형'}[type]||type;}
+
+function collectSurveyFromForm(){
+  survey.title=document.getElementById('surveyTitle').value.trim();
+  survey.description=document.getElementById('surveyDesc').value.trim();
+}
+function addQuestion(type='short'){
+  survey.questions.push({id:uid(),type,title:'',description:'',required:false,options:['radio','checkbox','select'].includes(type)?['선택지 1','선택지 2']:[],scaleMin:1,scaleMax:5,logic:null});
+  renderBuilder();
+}
+function removeQuestion(id){
+  survey.questions=survey.questions.filter(q=>q.id!==id);
+  survey.questions.forEach(q=>{if(q.logic&&q.logic.questionId===id)q.logic=null;});
+  renderBuilder();
+}
+function duplicateQuestion(id){
+  const idx=survey.questions.findIndex(q=>q.id===id); if(idx<0)return;
+  const copy=JSON.parse(JSON.stringify(survey.questions[idx])); copy.id=uid(); copy.title=copy.title?copy.title+' 복사본':'';
+  survey.questions.splice(idx+1,0,copy); renderBuilder();
+}
+function moveQuestion(id,dir){const idx=survey.questions.findIndex(q=>q.id===id);const next=idx+dir;if(idx<0||next<0||next>=survey.questions.length)return;[survey.questions[idx],survey.questions[next]]=[survey.questions[next],survey.questions[idx]];renderBuilder();}
+function updateQuestion(id,key,value){const q=survey.questions.find(x=>x.id===id);if(!q)return;q[key]=value;renderPreview();}
+function changeType(id,type){const q=survey.questions.find(x=>x.id===id);if(!q)return;q.type=type;if(['radio','checkbox','select'].includes(type)&&(!q.options||!q.options.length))q.options=['선택지 1','선택지 2'];if(!['radio','checkbox','select'].includes(type))q.options=[];renderBuilder();}
+function addOption(id){const q=survey.questions.find(x=>x.id===id);if(!q)return;q.options.push('새 선택지');renderBuilder();}
+function updateOption(id,idx,value){const q=survey.questions.find(x=>x.id===id);if(!q)return;q.options[idx]=value;renderPreview();}
+function removeOption(id,idx){const q=survey.questions.find(x=>x.id===id);if(!q)return;q.options.splice(idx,1);renderBuilder();}
+function setLogic(id){const idx=survey.questions.findIndex(x=>x.id===id);const q=survey.questions[idx];const prev=survey.questions.slice(0,idx);if(!q)return;if(!prev.length)return toast('앞선 질문이 있어야 조건 연결을 만들 수 있어요.');q.logic={questionId:prev[0].id,operator:'equals',value:''};renderBuilder();}
+function clearLogic(id){const q=survey.questions.find(x=>x.id===id);if(!q)return;q.logic=null;renderBuilder();}
+function updateLogic(id,key,value){const q=survey.questions.find(x=>x.id===id);if(!q||!q.logic)return;q.logic[key]=value;renderPreview();}
+
+function renderBuilder(){
+  collectSurveyFromForm();
+  document.getElementById('emptyQuestions').classList.toggle('hidden',survey.questions.length>0);
+  document.getElementById('questionList').innerHTML=survey.questions.map((q,idx)=>renderQuestionEditor(q,idx)).join('');
+  renderPreview();
+}
+function renderQuestionEditor(q,idx){
+  const prev=survey.questions.slice(0,idx);
+  const optionsEditor=['radio','checkbox','select'].includes(q.type)?`
+    <div class="field"><label>선택지</label><div class="option-list">
+      ${q.options.map((op,i)=>`<div class="option-row"><input value="${escapeHtml(op)}" oninput="updateOption('${q.id}',${i},this.value)"><button class="btn ghost small" onclick="removeOption('${q.id}',${i})">삭제</button></div>`).join('')}
+    </div><button class="btn ghost small" style="margin-top:8px" onclick="addOption('${q.id}')">선택지 추가</button></div>`:'';
+  const scaleEditor=q.type==='scale'?`<div class="row"><div class="field"><label>최소값</label><input type="number" value="${q.scaleMin}" oninput="updateQuestion('${q.id}','scaleMin',Number(this.value)||1)"></div><div class="field"><label>최대값</label><input type="number" value="${q.scaleMax}" oninput="updateQuestion('${q.id}','scaleMax',Number(this.value)||5)"></div></div>`:'';
+  const logicEditor=q.logic?`
+    <div class="logic-box"><div class="logic-title">조건 연결</div>
+      <div class="field"><label>이 질문은 아래 조건일 때만 표시</label><select onchange="updateLogic('${q.id}','questionId',this.value)">${prev.map(p=>`<option value="${p.id}" ${q.logic.questionId===p.id?'selected':''}>${escapeHtml(p.title||typeLabel(p.type))}</option>`).join('')}</select></div>
+      <div class="row"><div class="field"><label>조건</label><select onchange="updateLogic('${q.id}','operator',this.value)"><option value="equals" ${q.logic.operator==='equals'?'selected':''}>같을 때</option><option value="includes" ${q.logic.operator==='includes'?'selected':''}>포함할 때</option><option value="not_empty" ${q.logic.operator==='not_empty'?'selected':''}>응답이 있을 때</option></select></div><div class="field"><label>값</label><input value="${escapeHtml(q.logic.value||'')}" oninput="updateLogic('${q.id}','value',this.value)" placeholder="예: 예 / 5 / 선택지명"></div></div>
+      <button class="btn ghost small" onclick="clearLogic('${q.id}')">조건 해제</button>
+    </div>`:'';
+  return `<div class="question-card"><div class="q-head"><div><div class="q-title">${idx+1}번 질문</div><span class="q-type">${typeLabel(q.type)}</span></div><div class="q-actions"><button class="btn ghost small" onclick="moveQuestion('${q.id}',-1)">↑</button><button class="btn ghost small" onclick="moveQuestion('${q.id}',1)">↓</button><button class="btn ghost small" onclick="duplicateQuestion('${q.id}')">복제</button><button class="btn red small" onclick="removeQuestion('${q.id}')">삭제</button></div></div>
+    <div class="row"><div class="field"><label>질문 유형</label><select onchange="changeType('${q.id}',this.value)">${['short','long','radio','checkbox','select','scale'].map(t=>`<option value="${t}" ${q.type===t?'selected':''}>${typeLabel(t)}</option>`).join('')}</select></div><div class="field"><label>필수 여부</label><select onchange="updateQuestion('${q.id}','required',this.value==='true')"><option value="false" ${!q.required?'selected':''}>선택</option><option value="true" ${q.required?'selected':''}>필수</option></select></div></div>
+    <div class="field"><label>질문 제목</label><input value="${escapeHtml(q.title)}" oninput="updateQuestion('${q.id}','title',this.value)" placeholder="질문을 입력하세요"></div>
+    <div class="field"><label>설명 <span style="font-weight:400;color:#98a2b3">(선택)</span></label><input value="${escapeHtml(q.description)}" oninput="updateQuestion('${q.id}','description',this.value)" placeholder="응답 안내 문구"></div>
+    ${optionsEditor}${scaleEditor}
+    <div class="actions">${idx>0&&!q.logic?`<button class="btn ghost small" onclick="setLogic('${q.id}')">조건 연결</button>`:''}</div>${logicEditor}</div>`;
+}
+
+function renderPreview(){collectSurveyFromForm();const area=document.getElementById('previewArea');area.innerHTML=`<div class="preview-title">${escapeHtml(survey.title||'설문 제목')}</div><div class="preview-desc">${escapeHtml(survey.description||'설문 설명이 여기에 표시됩니다.')}</div>${survey.questions.map((q,i)=>renderAnswerQuestion(q,i,'preview')).join('')}`;wireAnswerArea(area);}
+function renderAnswerQuestion(q,idx,mode){
+  const req=q.required?' <span style="color:#ef4444">*</span>':'';
+  let body='';
+  if(q.type==='short') body=`<input data-answer-field data-q="${q.id}" placeholder="단답형 응답">`;
+  if(q.type==='long') body=`<textarea data-answer-field data-q="${q.id}" rows="4" placeholder="장문형 응답"></textarea>`;
+  if(q.type==='radio') body=(q.options||[]).map(op=>`<label class="inline-option"><input data-answer-field data-q="${q.id}" type="radio" name="${mode}_${q.id}" value="${escapeHtml(op)}"> ${escapeHtml(op)}</label>`).join('');
+  if(q.type==='checkbox') body=(q.options||[]).map(op=>`<label class="inline-option"><input data-answer-field data-q="${q.id}" type="checkbox" value="${escapeHtml(op)}"> ${escapeHtml(op)}</label>`).join('');
+  if(q.type==='select') body=`<select data-answer-field data-q="${q.id}"><option value="">선택해주세요</option>${(q.options||[]).map(op=>`<option value="${escapeHtml(op)}">${escapeHtml(op)}</option>`).join('')}</select>`;
+  if(q.type==='scale') body=`<input data-answer-field data-q="${q.id}" type="range" min="${q.scaleMin||1}" max="${q.scaleMax||5}" value="${q.scaleMin||1}" oninput="this.nextElementSibling.textContent=this.value"><div style="font-size:12px;color:#667085;margin-top:6px">선택값: <strong>${q.scaleMin||1}</strong></div>`;
+  return `<div class="answer-q" data-question-id="${q.id}" data-logic='${escapeHtml(JSON.stringify(q.logic||null))}'><div class="answer-q-title">${idx+1}. ${escapeHtml(q.title||typeLabel(q.type))}${req}</div>${q.description?`<div class="answer-q-desc">${escapeHtml(q.description)}</div>`:''}${body}</div>`;
+}
+function wireAnswerArea(area){area.querySelectorAll('[data-answer-field]').forEach(el=>{el.addEventListener('input',()=>applyLogic(area));el.addEventListener('change',()=>applyLogic(area));});applyLogic(area);}
+function getAreaAnswers(area){const answers={};area.querySelectorAll('[data-question-id]').forEach(qel=>{const qid=qel.dataset.questionId;const fields=[...qel.querySelectorAll('[data-answer-field]')];if(!fields.length)return;const first=fields[0];if(first.type==='checkbox')answers[qid]=fields.filter(f=>f.checked).map(f=>f.value);else if(first.type==='radio'){const c=fields.find(f=>f.checked);answers[qid]=c?c.value:'';}else answers[qid]=first.value;});return answers;}
+function conditionPass(logic,answers){if(!logic)return true;const val=answers[logic.questionId];if(logic.operator==='not_empty')return Array.isArray(val)?val.length>0:String(val||'').trim()!=='';if(logic.operator==='includes')return Array.isArray(val)?val.includes(logic.value):String(val||'').includes(logic.value);return Array.isArray(val)?val.includes(logic.value):String(val||'')===String(logic.value);}
+function applyLogic(area){const answers=getAreaAnswers(area);area.querySelectorAll('[data-question-id]').forEach(qel=>{let logic=null;try{logic=JSON.parse(qel.dataset.logic||'null')}catch(e){}qel.classList.toggle('hidden',!conditionPass(logic,answers));});}
+
+async function saveSurvey(){
+  collectSurveyFromForm();
+  const {data:{user}}=await db.auth.getUser();
+  if(!user) return toast('설문을 저장하려면 로그인해주세요.');
+  if(!survey.title) return toast('설문 제목을 입력해주세요.');
+  if(!survey.questions.length) return toast('질문을 1개 이상 추가해주세요.');
+  const form_schema={title:survey.title,description:survey.description,questions:survey.questions};
+  let result;
+  if(survey.id){
+    result=await db.from('payble_public_surveys').update({title:survey.title,description:survey.description,form_schema,is_published:true,updated_at:new Date().toISOString()}).eq('id',survey.id).select('id').single();
+  }else{
+    result=await db.from('payble_public_surveys').insert({owner_id:user.id,title:survey.title,description:survey.description,form_schema,is_published:true}).select('id').single();
+  }
+  if(result.error){showResult('saveResult','저장 실패: '+result.error.message);return;}
+  survey.id=result.data.id;
+  const link=location.origin+location.pathname+'?survey='+encodeURIComponent(survey.id);
+  showResult('saveResult',`<div class="link-box"><strong>응답 링크</strong><br><code>${escapeHtml(link)}</code><br><br><strong>설문 ID</strong><br><code>${escapeHtml(survey.id)}</code></div><div class="actions"><button class="btn ghost small" onclick="copyText('${jsStr(link)}')">응답 링크 복사</button><button class="btn ghost small" onclick="switchMode('mine');loadMySurveys()">내 설문으로 이동</button></div>`);
+  loadMySurveys();
+}
+function showResult(id,html){const box=document.getElementById(id);box.innerHTML=html;box.classList.add('show');}
+function copyText(text){navigator.clipboard.writeText(text).then(()=>toast('복사됐어요.')).catch(()=>toast('복사에 실패했어요.'));}
+function resetBuilder(){survey={id:null,title:'',description:'',questions:[]};document.getElementById('surveyTitle').value='';document.getElementById('surveyDesc').value='';addQuestion('radio');renderBuilder();showResult('saveResult','새 설문 작성 화면으로 초기화했습니다.');}
+function exportSurveyJson(){collectSurveyFromForm();const blob=new Blob([JSON.stringify(survey,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(survey.title||'payble-survey')+'.json';a.click();URL.revokeObjectURL(a.href);}
+function importSurveyJson(event){const file=event.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(reader.result);survey={id:null,title:obj.title||'',description:obj.description||'',questions:obj.questions||obj.form_schema?.questions||[]};document.getElementById('surveyTitle').value=survey.title;document.getElementById('surveyDesc').value=survey.description;renderBuilder();toast('설문 JSON을 불러왔습니다.');}catch(e){toast('JSON 파일을 읽지 못했습니다.');}};reader.readAsText(file);}
+
+async function loadSurveyFromUrl(){const params=new URLSearchParams(location.search);const id=params.get('survey');if(id){document.getElementById('answerSurveyId').value=id;switchMode('answer');await loadSurveyById(id);}}
+function loadSurveyFromInput(){const id=document.getElementById('answerSurveyId').value.trim();if(!id)return toast('설문 ID를 입력해주세요.');loadSurveyById(id);}
+async function loadSurveyById(id){
+  const {data,error}=await db.from('payble_public_surveys').select('*').eq('id',id).eq('is_published',true).single();
+  if(error||!data){document.getElementById('answerArea').innerHTML='<div class="empty">설문을 불러오지 못했습니다. 링크를 확인해주세요.</div>';return;}
+  currentSurveyForAnswer=data;survey=data.form_schema||{title:data.title,description:data.description,questions:[]};
+  document.getElementById('answerTitle').textContent=data.title;document.getElementById('answerDesc').textContent=data.description||'아래 항목에 응답해주세요.';
+  const area=document.getElementById('answerArea');area.innerHTML=survey.questions.map((q,i)=>renderAnswerQuestion(q,i,'answer')).join('');wireAnswerArea(area);
+  document.getElementById('submitAnswerBtn').classList.remove('hidden');document.getElementById('submitAnswerBtn').disabled=false;showResult('answerResult','설문을 불러왔습니다.');
+}
+async function submitAnswer(){
+  if(!currentSurveyForAnswer)return toast('설문을 먼저 불러와주세요.');
+  const area=document.getElementById('answerArea');const answers=getAreaAnswers(area);
+  for(const q of survey.questions){const el=area.querySelector(`[data-question-id="${q.id}"]`);if(!el||el.classList.contains('hidden'))continue;const val=answers[q.id];const empty=Array.isArray(val)?val.length===0:String(val||'').trim()==='';if(q.required&&empty)return toast(`${q.title||'필수 질문'}에 응답해주세요.`);}
+  const namedAnswers={};survey.questions.forEach(q=>{const el=area.querySelector(`[data-question-id="${q.id}"]`);if(el&&!el.classList.contains('hidden'))namedAnswers[q.title||q.id]=answers[q.id];});
+  const {error}=await db.from('payble_survey_responses').insert({survey_id:currentSurveyForAnswer.id,answers:namedAnswers,raw_answers:answers,respondent_meta:{userAgent:navigator.userAgent.slice(0,120)}});
+  if(error){showResult('answerResult','응답 제출 실패: '+error.message);return;}
+  showResult('answerResult','응답이 제출되었습니다. 참여해주셔서 감사합니다.');document.getElementById('submitAnswerBtn').disabled=true;
+}
+
+async function loadMySurveys(){
+  const {data:{user}}=await db.auth.getUser();
+  const wrap=document.getElementById('mySurveyList');
+  if(!user){wrap.innerHTML='<div class="empty">로그인 후 내 설문을 확인할 수 있습니다.</div>';return;}
+  const {data,error}=await db.from('payble_public_surveys').select('id,title,description,created_at,updated_at,is_published,form_schema').eq('owner_id',user.id).order('created_at',{ascending:false});
+  if(error){wrap.innerHTML='<div class="empty">내 설문을 불러오지 못했습니다: '+escapeHtml(error.message)+'</div>';return;}
+  if(!data||!data.length){wrap.innerHTML='<div class="empty">아직 만든 설문이 없습니다.</div>';return;}
+  wrap.innerHTML=data.map(s=>{const link=location.origin+location.pathname+'?survey='+encodeURIComponent(s.id);return `<div class="survey-item"><div class="survey-item-title">${escapeHtml(s.title)}</div><div class="survey-item-meta">${escapeHtml(s.description||'설명 없음')}<br>생성일: ${new Date(s.created_at).toLocaleString('ko-KR')}</div><div class="link-box">${escapeHtml(link)}</div><div class="actions"><button class="btn ghost small" onclick="copyText('${jsStr(link)}')">링크 복사</button><button class="btn blue small" onclick="editSurvey('${s.id}')">수정</button><button class="btn green small" onclick="loadResponses('${s.id}')">응답 보기</button><button class="btn ghost small" onclick="downloadResponsesCsv('${s.id}')">CSV 다운로드</button><button class="btn red small" onclick="deleteSurvey('${s.id}')">삭제</button></div></div>`;}).join('');
+}
+async function editSurvey(id){
+  const {data,error}=await db.from('payble_public_surveys').select('*').eq('id',id).single();
+  if(error||!data)return toast('설문을 불러오지 못했습니다.');
+  survey=data.form_schema||{title:data.title,description:data.description,questions:[]};survey.id=data.id;
+  document.getElementById('surveyTitle').value=survey.title||data.title||'';document.getElementById('surveyDesc').value=survey.description||data.description||'';renderBuilder();switchMode('builder');toast('수정할 설문을 불러왔습니다.');
+}
+async function deleteSurvey(id){
+  if(!confirm('이 설문과 응답을 삭제할까요? 되돌릴 수 없습니다.'))return;
+  const {error}=await db.from('payble_public_surveys').delete().eq('id',id);
+  if(error)return toast('삭제 실패: '+error.message);
+  toast('삭제되었습니다.');loadMySurveys();document.getElementById('responseTable').innerHTML='';
+}
+async function loadResponses(id){
+  const {data,error}=await db.from('payble_survey_responses').select('*').eq('survey_id',id).order('created_at',{ascending:false});
+  if(error){showResult('manageResult','응답 불러오기 실패: '+error.message);return;}
+  loadedResponses=data||[];showResult('manageResult',`총 ${loadedResponses.length}개의 응답을 불러왔습니다.`);renderResponses();
+}
+function renderResponses(){
+  const wrap=document.getElementById('responseTable');
+  if(!loadedResponses.length){wrap.innerHTML='<div class="empty">아직 응답이 없습니다.</div>';return;}
+  const keys=Array.from(new Set(loadedResponses.flatMap(r=>Object.keys(r.answers||{}))));
+  wrap.innerHTML=`<div class="table-wrap"><table><thead><tr><th>제출일</th>${keys.map(k=>`<th>${escapeHtml(k)}</th>`).join('')}</tr></thead><tbody>${loadedResponses.map(r=>`<tr><td>${new Date(r.created_at).toLocaleString('ko-KR')}</td>${keys.map(k=>`<td>${formatAnswer(r.answers?.[k])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function formatAnswer(v){if(Array.isArray(v))return escapeHtml(v.join(', '));if(v&&typeof v==='object')return escapeHtml(JSON.stringify(v));return escapeHtml(v??'');}
+async function downloadResponsesCsv(id){
+  if(!loadedResponses.length) await loadResponses(id);
+  if(!loadedResponses.length)return toast('다운로드할 응답이 없습니다.');
+  const keys=Array.from(new Set(loadedResponses.flatMap(r=>Object.keys(r.answers||{}))));
+  const rows=[['created_at',...keys]];
+  loadedResponses.forEach(r=>rows.push([r.created_at,...keys.map(k=>Array.isArray(r.answers?.[k])?r.answers[k].join('|'):(r.answers?.[k]??''))]));
+  const csv=rows.map(row=>row.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='payble-survey-responses.csv';a.click();URL.revokeObjectURL(a.href);
+}
+
+document.getElementById('surveyTitle').addEventListener('input',renderPreview);
+document.getElementById('surveyDesc').addEventListener('input',renderPreview);
+db.auth.onAuthStateChange(()=>refreshAuth());
+
+(function init(){
+  refreshAuth();
+  addQuestion('radio');
+  survey.questions[0].title='가장 만족한 부분은 무엇인가요?';
+  survey.questions[0].options=['가격','기능','디자인','고객지원','기타'];
+  addQuestion('long');
+  survey.questions[1].title='개선이 필요하다고 느낀 점을 적어주세요.';
+  survey.questions[1].required=false;
+  renderBuilder();
+  loadSurveyFromUrl();
+})();
+</script>
+</body>
+</html>
