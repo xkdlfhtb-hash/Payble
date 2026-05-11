@@ -28,6 +28,10 @@ h1{font-size:32px;line-height:1.18;letter-spacing:-.06em;margin-bottom:10px}.her
 input,textarea,select{width:100%;border:1px solid #d9dfed;border-radius:12px;background:#fff;color:var(--text);padding:11px 13px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s}textarea{resize:vertical;line-height:1.65}input:focus,textarea:focus,select:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(79,124,255,.12)}
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:12px;padding:12px 14px;font-weight:900;font-family:inherit;cursor:pointer;background:#111827;color:#fff}.btn.blue{background:var(--blue)}.btn.green{background:var(--green)}.btn.red{background:var(--red)}.btn.ghost{background:#fff;color:#667085;border:1px solid #d9dfed}.btn.small{font-size:12px;padding:8px 10px;border-radius:10px}.btn:active{transform:scale(.99)}
 .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}.notice{padding:12px 14px;background:#fff;border:1px dashed #d7dfef;border-radius:13px;color:var(--muted);font-size:12px;line-height:1.7;margin:12px 0}.notice strong{color:#111827}
+.auth-message{margin-top:10px;padding:10px 12px;border-radius:12px;border:1px solid #dbe7ff;background:#f8faff;color:#334155;font-size:12px;line-height:1.6;white-space:pre-wrap}
+.auth-message.error{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+.auth-message.success{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+.btn[disabled]{opacity:.58;cursor:not-allowed;transform:none!important}
 .auth-card{background:linear-gradient(135deg,#ffffff,#f8fbff)}.auth-status{font-size:12px;color:#667085;line-height:1.6}.auth-status strong{color:#2563eb}
 .hidden{display:none!important}.question-card{border:1px solid #e1e8fb;background:#fbfcff;border-radius:16px;padding:14px;margin-bottom:12px}.q-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:10px}.q-title{font-size:14px;font-weight:900;color:#111827}.q-type{display:inline-flex;margin-top:4px;border-radius:999px;background:#eef4ff;color:#2563eb;border:1px solid #dbe7ff;padding:3px 8px;font-size:11px;font-weight:800}.q-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.option-list{display:flex;flex-direction:column;gap:7px}.option-row{display:grid;grid-template-columns:1fr auto;gap:6px}
 .logic-box{margin-top:10px;background:#fff;border:1px dashed #d7dfef;border-radius:12px;padding:12px}.logic-title{font-size:12px;font-weight:900;color:#2563eb;margin-bottom:8px}
@@ -45,7 +49,7 @@ input,textarea,select{width:100%;border:1px solid #d9dfed;border-radius:12px;bac
     <div class="head-actions">
       <a href="index.html">연봉 계산기로 돌아가기</a>
       <button class="pill-btn" onclick="switchMode('builder')">설문 만들기</button>
-      <button class="pill-btn" onclick="switchMode('mine')">내 설문</button>
+      <button class="pill-btn" onclick="switchMode('mine')">설문 관리</button>
     </div>
   </div>
 </header>
@@ -54,35 +58,19 @@ input,textarea,select{width:100%;border:1px solid #d9dfed;border-radius:12px;bac
   <section class="hero">
     <div class="kicker">FREE SURVEY BUILDER</div>
     <h1>누구나 무료로 설문을 만들고<br>응답을 관리할 수 있어요</h1>
-    <p>구글폼보다 가볍게 시작하고, 질문 항목의 조건 연결과 해제를 자유롭게 설정할 수 있는 설문 제작 도구입니다. 설문 작성자는 로그인 후 자기 설문만 관리하고, 응답자는 로그인 없이 링크로 참여합니다.</p>
+    <p>구글폼보다 가볍게 시작하고, 질문 항목의 조건 연결과 해제를 자유롭게 설정할 수 있는 설문 제작 도구입니다. 회원가입 없이 설문 작성자가 직접 정한 관리 코드로 본인의 설문과 응답을 관리합니다.</p>
   </section>
 
   <section class="card auth-card">
-    <div class="card-title">작성자 로그인</div>
-    <div class="card-desc">설문 생성·수정·응답 확인은 작성자 계정으로 관리됩니다. 응답자는 로그인 없이 설문에 참여할 수 있습니다.</div>
-    <div id="authLoggedOut">
-      <div class="row">
-        <div class="field"><label>이메일</label><input id="authEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
-        <div class="field"><label>비밀번호</label><input id="authPassword" type="password" placeholder="8자 이상 권장" autocomplete="current-password"></div>
-      </div>
-      <div class="actions">
-        <button class="btn blue" onclick="signIn()">로그인</button>
-        <button class="btn ghost" onclick="signUp()">회원가입</button>
-      </div>
-      <div class="notice">회원가입 후 이메일 확인이 필요한 설정이라면, 받은 메일의 확인 링크를 누른 뒤 로그인하세요.</div>
-    </div>
-    <div id="authLoggedIn" class="hidden">
-      <div class="auth-status">현재 <strong id="authUserEmail"></strong> 계정으로 로그인 중입니다.</div>
-      <div class="actions">
-        <button class="btn ghost" onclick="signOut()">로그아웃</button>
-      </div>
-    </div>
+    <div class="card-title">관리 코드 방식</div>
+    <div class="card-desc">회원가입 없이 설문을 만들 수 있습니다. 설문 작성자가 직접 정한 <strong>관리 코드</strong>와 생성된 <strong>설문 ID</strong>를 알고 있어야 수정·삭제·응답 확인이 가능합니다.</div>
+    <div class="notice"><strong>중요:</strong> 관리 코드는 Payble에서 복구할 수 없습니다. 설문을 저장한 뒤 표시되는 설문 ID와 관리 코드를 반드시 따로 보관하세요. 관리 코드가 유출되면 다른 사람이 설문을 수정할 수 있으니 쉬운 단어보다 길고 예측하기 어려운 코드를 권장합니다.</div>
   </section>
 
   <div class="tabs">
     <button class="tab active" id="tabBuilder" onclick="switchMode('builder')">설문 만들기</button>
     <button class="tab" id="tabAnswer" onclick="switchMode('answer')">응답하기</button>
-    <button class="tab" id="tabMine" onclick="switchMode('mine')">내 설문</button>
+    <button class="tab" id="tabMine" onclick="switchMode('mine')">설문 관리</button>
   </div>
 
   <section id="builderMode">
@@ -92,6 +80,7 @@ input,textarea,select{width:100%;border:1px solid #d9dfed;border-radius:12px;bac
           <div class="card-title">설문 기본 정보</div>
           <div class="field"><label for="surveyTitle">설문 제목</label><input id="surveyTitle" placeholder="예: 이용자 만족도 조사"></div>
           <div class="field"><label for="surveyDesc">설문 설명</label><textarea id="surveyDesc" rows="3" placeholder="설문 목적, 소요 시간, 개인정보 주의사항 등을 적어주세요."></textarea></div>
+          <div class="field"><label for="surveyManageCode">관리 코드</label><input id="surveyManageCode" type="password" placeholder="예: 내가 정한 긴 코드 또는 문장"><div class="notice">새 설문 저장 또는 기존 설문 업데이트에 사용됩니다. 설문 ID와 함께 보관하세요.</div></div>
           <div class="actions">
             <button class="btn ghost small" onclick="addQuestion('short')">단답형</button>
             <button class="btn ghost small" onclick="addQuestion('long')">장문형</button>
@@ -143,9 +132,20 @@ input,textarea,select{width:100%;border:1px solid #d9dfed;border-radius:12px;bac
 
   <section id="mineMode" class="hidden">
     <div class="card">
-      <div class="card-title">내 설문</div>
-      <div class="card-desc">로그인한 계정으로 만든 설문만 표시됩니다. 응답 확인과 CSV 다운로드도 본인 설문에서만 가능합니다.</div>
-      <div class="actions"><button class="btn blue" onclick="loadMySurveys()">내 설문 새로고침</button></div>
+      <div class="card-title">설문 관리</div>
+      <div class="card-desc">설문 ID와 작성자가 직접 정한 관리 코드를 입력하면 해당 설문만 수정·삭제하고 응답을 확인할 수 있습니다.</div>
+      <div class="row">
+        <div class="field"><label for="manageSurveyId">설문 ID</label><input id="manageSurveyId" placeholder="공유 링크의 survey 값"></div>
+        <div class="field"><label for="manageCode">관리 코드</label><input id="manageCode" type="password" placeholder="설문 작성자가 설정한 코드"></div>
+      </div>
+      <div class="actions">
+        <button class="btn blue" onclick="loadManagedSurvey()">설문 불러와 수정</button>
+        <button class="btn green" onclick="loadManagedResponses()">응답 보기</button>
+        <button class="btn ghost" onclick="downloadManagedSurveyPdf()">PDF 보관증</button>
+        <button class="btn ghost" onclick="downloadManagedResponsesCsv()">CSV 다운로드</button>
+        <button class="btn red" onclick="deleteManagedSurvey()">설문 삭제</button>
+      </div>
+      <div class="notice">관리 코드는 서버에 원문으로 저장되지 않고 해시값으로 비교됩니다. 단, 관리 코드를 잃어버리면 Payble에서 복구할 수 없습니다.</div>
       <div id="mySurveyList" style="margin-top:14px"></div>
     </div>
     <div class="card">
@@ -167,40 +167,152 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let survey = { id: null, title: '', description: '', questions: [] };
 let currentSurveyForAnswer = null;
 let loadedResponses = [];
-let currentUser = null;
+let currentManageCode = '';
+let currentManagedSurveyId = null;
 
 function uid(){return 'q_'+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
 function escapeHtml(v){return String(v ?? '').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function jsStr(v){return String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,'\\n').replace(/\r/g,'');}
 
-async function refreshAuth(){
-  const {data:{user}}=await db.auth.getUser();
-  currentUser=user;
-  document.getElementById('authLoggedOut').classList.toggle('hidden', !!user);
-  document.getElementById('authLoggedIn').classList.toggle('hidden', !user);
-  if(user) document.getElementById('authUserEmail').textContent=user.email || user.id;
+function getManageCodeInput(){
+  return (document.getElementById('surveyManageCode')?.value || document.getElementById('manageCode')?.value || '').trim();
 }
-async function signUp(){
-  const email=document.getElementById('authEmail').value.trim();
-  const password=document.getElementById('authPassword').value;
-  if(!email||!password) return toast('이메일과 비밀번호를 입력해주세요.');
-  const {error}=await db.auth.signUp({email,password});
-  if(error) return toast('회원가입 실패: '+error.message);
-  toast('회원가입 요청이 완료됐습니다. 이메일 확인이 필요할 수 있어요.');
-  await refreshAuth();
+function getManageFields(){
+  return {
+    id:(document.getElementById('manageSurveyId')?.value || '').trim(),
+    code:(document.getElementById('manageCode')?.value || '').trim()
+  };
 }
-async function signIn(){
-  const email=document.getElementById('authEmail').value.trim();
-  const password=document.getElementById('authPassword').value;
-  if(!email||!password) return toast('이메일과 비밀번호를 입력해주세요.');
-  const {error}=await db.auth.signInWithPassword({email,password});
-  if(error) return toast('로그인 실패: '+error.message);
-  toast('로그인되었습니다.');
-  await refreshAuth();
-  loadMySurveys();
+
+function describeLogicForPdf(logic, sv){
+  if(!logic || !logic.questionId)return '없음';
+  const ref=(sv.questions||[]).find(q=>q.id===logic.questionId);
+  const refTitle=ref?.title || '선택한 질문';
+  const op=logic.operator==='exists'?'응답이 있을 때':logic.operator==='includes'?'포함할 때':'같을 때';
+  return logic.operator==='exists'
+    ? `${refTitle}에 응답이 있을 때 표시`
+    : `${refTitle}의 응답이 "${logic.value||''}"와 ${op} 표시`;
 }
-async function signOut(){await db.auth.signOut(); currentUser=null; toast('로그아웃되었습니다.'); await refreshAuth();}
+function buildSurveyArchiveHtml(sv, code, link){
+  const now=new Date().toLocaleString('ko-KR');
+  const questions=(sv.questions||[]).map((q,idx)=>{
+    const optionList=(q.options||[]).length
+      ? `<ul>${q.options.map(opt=>`<li>${escapeHtml(opt)}</li>`).join('')}</ul>`
+      : '<span class="muted">선택지 없음</span>';
+    const scaleInfo=q.type==='scale' ? `<div class="meta">척도 범위: ${q.scaleMin||1} ~ ${q.scaleMax||5}</div>` : '';
+    return `<div class="q">
+      <div class="q-title">${idx+1}. ${escapeHtml(q.title||'제목 없는 질문')} <span>${escapeHtml(typeLabel(q.type))}${q.required?' · 필수':' · 선택'}</span></div>
+      ${q.description?`<div class="desc">${escapeHtml(q.description)}</div>`:''}
+      ${scaleInfo}
+      <div class="meta"><strong>조건 연결:</strong> ${escapeHtml(describeLogicForPdf(q.logic,sv))}</div>
+      <div class="options">${optionList}</div>
+    </div>`;
+  }).join('');
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>Payble 설문 보관증</title>
+<style>
+  @page{size:A4;margin:18mm}
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:#111827;line-height:1.55;margin:0;background:#fff}
+  .wrap{max-width:900px;margin:0 auto;padding:24px}
+  .brand{font-size:14px;font-weight:900;color:#4f7cff;margin-bottom:6px}
+  h1{font-size:28px;margin:0 0 10px;letter-spacing:-.04em}
+  .sub{color:#6b7280;font-size:13px;margin-bottom:20px}
+  .box{border:1px solid #d9dfed;border-radius:14px;padding:16px;margin:12px 0;background:#fbfcff}
+  .row{display:grid;grid-template-columns:160px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid #edf1f8;font-size:13px}
+  .row:last-child{border-bottom:0}
+  .label{font-weight:800;color:#374151}
+  code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:2px 5px;word-break:break-all}
+  .warn{border:1px solid #f1d083;background:#fff9db;color:#6b4a00;border-radius:12px;padding:12px 14px;font-size:13px;margin:14px 0}
+  h2{font-size:18px;margin:24px 0 10px}
+  .q{border:1px solid #e4eaf6;border-radius:12px;padding:14px;margin:10px 0;break-inside:avoid}
+  .q-title{font-weight:900;font-size:15px;margin-bottom:6px}
+  .q-title span{font-size:12px;color:#4f7cff;font-weight:800}
+  .desc,.meta,.muted{font-size:12px;color:#6b7280;margin:4px 0}
+  ul{margin:6px 0 0 18px;padding:0;font-size:12px}
+  .footer{margin-top:28px;font-size:11px;color:#9ca3af;border-top:1px solid #edf1f8;padding-top:10px}
+  .print-actions{margin:18px 0;display:flex;gap:8px}
+  button{border:0;border-radius:10px;padding:10px 14px;background:#4f7cff;color:#fff;font-weight:800;cursor:pointer}
+  @media print{.print-actions{display:none}.wrap{padding:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">Payble Survey</div>
+  <h1>설문 보관증</h1>
+  <div class="sub">이 문서는 설문 작성자가 설문 ID와 관리 코드를 보관하기 위한 자료입니다.</div>
+  <div class="print-actions"><button onclick="window.print()">PDF로 저장 / 인쇄</button></div>
+
+  <div class="box">
+    <div class="row"><div class="label">설문 제목</div><div>${escapeHtml(sv.title||'제목 없음')}</div></div>
+    <div class="row"><div class="label">설문 설명</div><div>${escapeHtml(sv.description||'-')}</div></div>
+    <div class="row"><div class="label">설문 ID</div><div><code>${escapeHtml(sv.id||'')}</code></div></div>
+    <div class="row"><div class="label">관리 코드</div><div><code>${escapeHtml(code||'')}</code></div></div>
+    <div class="row"><div class="label">응답 링크</div><div><code>${escapeHtml(link||'')}</code></div></div>
+    <div class="row"><div class="label">저장 일시</div><div>${escapeHtml(now)}</div></div>
+  </div>
+
+  <div class="warn"><strong>중요:</strong> 설문 ID와 관리 코드를 잃어버리면 수정·삭제·응답 확인이 어렵습니다. 이 PDF는 본인만 보관하고 다른 사람에게 공유하지 마세요.</div>
+
+  <h2>질문 구성</h2>
+  ${questions || '<div class="box">등록된 질문이 없습니다.</div>'}
+
+  <div class="footer">© 2026 Payble Survey · 관리 코드는 서버에 원문 저장되지 않으며, 이 보관증은 작성자 브라우저에서 생성됩니다.</div>
+</div>
+<script>setTimeout(()=>window.print(),500);<\/script>
+</body>
+</html>`;
+}
+function saveSurveyArchivePdf(id, code, link){
+  const sv={...survey,id:id||survey.id};
+  const finalCode=code || getManageCodeInput() || currentManageCode;
+  const finalLink=link || (sv.id?location.origin+location.pathname+'?survey='+encodeURIComponent(sv.id):'');
+  if(!sv.id || !finalCode)return toast('설문 ID와 관리 코드가 필요합니다.');
+  const win=window.open('','_blank');
+  if(!win){toast('팝업이 차단되었습니다. 팝업 차단을 해제한 뒤 다시 시도해주세요.');return;}
+  win.document.open();
+  win.document.write(buildSurveyArchiveHtml(sv,finalCode,finalLink));
+  win.document.close();
+}
+async function downloadManagedSurveyPdf(){
+  const {id,code}=getManageFields();
+  if(!id||!code)return toast('설문 ID와 관리 코드를 입력해주세요.');
+  const {data,error}=await db.rpc('payble_get_manage_survey_code',{p_survey_id:id,p_manage_code:code});
+  const row=Array.isArray(data)?data[0]:data;
+  if(error||!row){showResult('manageResult','PDF 보관증을 만들 수 없습니다. 설문 ID 또는 관리 코드를 확인해주세요.');return;}
+  const sv=row.form_schema||{title:row.title,description:row.description,questions:[]};
+  sv.id=row.id;
+  survey=sv;
+  currentManagedSurveyId=row.id;
+  currentManageCode=code;
+  const link=location.origin+location.pathname+'?survey='+encodeURIComponent(row.id);
+  saveSurveyArchivePdf(row.id,code,link);
+}
+function rememberSurvey(id,title){
+  if(!id)return;
+  const key='payble_recent_surveys';
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){list=[];}
+  list=list.filter(x=>x.id!==id);
+  list.unshift({id,title:title||'제목 없음',savedAt:new Date().toISOString()});
+  localStorage.setItem(key,JSON.stringify(list.slice(0,8)));
+}
+function renderRecentSurveys(){
+  const wrap=document.getElementById('mySurveyList');
+  if(!wrap)return;
+  let list=[];
+  try{list=JSON.parse(localStorage.getItem('payble_recent_surveys')||'[]');}catch(e){list=[];}
+  if(!list.length){
+    wrap.innerHTML='<div class="empty">이 브라우저에서 최근 저장한 설문이 없습니다. 설문 ID와 관리 코드를 입력해 관리할 수 있습니다.</div>';
+    return;
+  }
+  wrap.innerHTML='<div class="notice">이 목록은 현재 브라우저에만 저장되는 빠른 접근 목록입니다. 실제 관리는 설문 ID와 관리 코드로 확인됩니다.</div>'+
+    list.map(s=>{const link=location.origin+location.pathname+'?survey='+encodeURIComponent(s.id);return `<div class="survey-item"><div class="survey-item-title">${escapeHtml(s.title)}</div><div class="survey-item-meta">설문 ID: <code>${escapeHtml(s.id)}</code><br>저장일: ${new Date(s.savedAt).toLocaleString('ko-KR')}</div><div class="link-box">${escapeHtml(link)}</div><div class="actions"><button class="btn ghost small" onclick="copyText('${jsStr(link)}')">응답 링크 복사</button><button class="btn blue small" onclick="document.getElementById('manageSurveyId').value='${jsStr(s.id)}';switchMode('mine');">관리창에 넣기</button></div></div>`;}).join('');
+}
 
 function switchMode(mode){
   document.getElementById('builderMode').classList.toggle('hidden',mode!=='builder');
@@ -210,7 +322,7 @@ function switchMode(mode){
   document.getElementById('tabAnswer').classList.toggle('active',mode==='answer');
   document.getElementById('tabMine').classList.toggle('active',mode==='mine');
   if(mode==='answer'&&!currentSurveyForAnswer) loadSurveyFromUrl();
-  if(mode==='mine') loadMySurveys();
+  if(mode==='mine') renderRecentSurveys();
 }
 function typeLabel(type){return {short:'단답형',long:'장문형',radio:'객관식',checkbox:'체크박스',select:'드롭다운',scale:'척도형'}[type]||type;}
 
@@ -288,22 +400,38 @@ function applyLogic(area){const answers=getAreaAnswers(area);area.querySelectorA
 
 async function saveSurvey(){
   collectSurveyFromForm();
-  const {data:{user}}=await db.auth.getUser();
-  if(!user) return toast('설문을 저장하려면 로그인해주세요.');
+  const code=getManageCodeInput();
   if(!survey.title) return toast('설문 제목을 입력해주세요.');
   if(!survey.questions.length) return toast('질문을 1개 이상 추가해주세요.');
+  if(!code || code.length<4) return toast('관리 코드를 4자 이상 입력해주세요.');
   const form_schema={title:survey.title,description:survey.description,questions:survey.questions};
   let result;
   if(survey.id){
-    result=await db.from('payble_public_surveys').update({title:survey.title,description:survey.description,form_schema,is_published:true,updated_at:new Date().toISOString()}).eq('id',survey.id).select('id').single();
+    result=await db.rpc('payble_update_survey_code',{
+      p_survey_id:survey.id,
+      p_manage_code:code,
+      p_title:survey.title,
+      p_description:survey.description,
+      p_form_schema:form_schema
+    });
+    if(result.error || result.data!==true){showResult('saveResult','업데이트 실패: '+(result.error?.message||'설문 ID 또는 관리 코드가 맞지 않습니다.'));return;}
   }else{
-    result=await db.from('payble_public_surveys').insert({owner_id:user.id,title:survey.title,description:survey.description,form_schema,is_published:true}).select('id').single();
+    result=await db.rpc('payble_create_survey_code',{
+      p_title:survey.title,
+      p_description:survey.description,
+      p_form_schema:form_schema,
+      p_manage_code:code
+    });
+    if(result.error){showResult('saveResult','저장 실패: '+result.error.message);return;}
+    survey.id=result.data;
   }
-  if(result.error){showResult('saveResult','저장 실패: '+result.error.message);return;}
-  survey.id=result.data.id;
+  currentManageCode=code;
+  currentManagedSurveyId=survey.id;
+  rememberSurvey(survey.id,survey.title);
   const link=location.origin+location.pathname+'?survey='+encodeURIComponent(survey.id);
-  showResult('saveResult',`<div class="link-box"><strong>응답 링크</strong><br><code>${escapeHtml(link)}</code><br><br><strong>설문 ID</strong><br><code>${escapeHtml(survey.id)}</code></div><div class="actions"><button class="btn ghost small" onclick="copyText('${jsStr(link)}')">응답 링크 복사</button><button class="btn ghost small" onclick="switchMode('mine');loadMySurveys()">내 설문으로 이동</button></div>`);
-  loadMySurveys();
+  const manageText=`설문 ID: ${survey.id}\n관리 코드: ${code}\n응답 링크: ${link}`;
+  showResult('saveResult',`<div class="link-box"><strong>응답 링크</strong><br><code>${escapeHtml(link)}</code><br><br><strong>설문 ID</strong><br><code>${escapeHtml(survey.id)}</code><br><br><strong>관리 코드</strong><br><code>작성자가 입력한 코드</code></div><div class="notice"><strong>보관 필수:</strong> 설문 ID와 관리 코드를 잃어버리면 수정·삭제·응답 확인이 어렵습니다. 아래 PDF 보관증을 저장해두세요.</div><div class="actions"><button class="btn ghost small" onclick="copyText('${jsStr(link)}')">응답 링크 복사</button><button class="btn ghost small" onclick="copyText('${jsStr(manageText)}')">관리 정보 복사</button><button class="btn blue small" onclick="saveSurveyArchivePdf('${jsStr(survey.id)}','${jsStr(code)}','${jsStr(link)}')">PDF 보관증 저장</button><button class="btn ghost small" onclick="document.getElementById('manageSurveyId').value='${jsStr(survey.id)}';document.getElementById('manageCode').value=document.getElementById('surveyManageCode').value;switchMode('mine');">관리 화면으로 이동</button></div>`);
+  renderRecentSurveys();
 }
 function showResult(id,html){const box=document.getElementById(id);box.innerHTML=html;box.classList.add('show');}
 function copyText(text){navigator.clipboard.writeText(text).then(()=>toast('복사됐어요.')).catch(()=>toast('복사에 실패했어요.'));}
@@ -314,10 +442,11 @@ function importSurveyJson(event){const file=event.target.files[0];if(!file)retur
 async function loadSurveyFromUrl(){const params=new URLSearchParams(location.search);const id=params.get('survey');if(id){document.getElementById('answerSurveyId').value=id;switchMode('answer');await loadSurveyById(id);}}
 function loadSurveyFromInput(){const id=document.getElementById('answerSurveyId').value.trim();if(!id)return toast('설문 ID를 입력해주세요.');loadSurveyById(id);}
 async function loadSurveyById(id){
-  const {data,error}=await db.from('payble_public_surveys').select('*').eq('id',id).eq('is_published',true).single();
-  if(error||!data){document.getElementById('answerArea').innerHTML='<div class="empty">설문을 불러오지 못했습니다. 링크를 확인해주세요.</div>';return;}
-  currentSurveyForAnswer=data;survey=data.form_schema||{title:data.title,description:data.description,questions:[]};
-  document.getElementById('answerTitle').textContent=data.title;document.getElementById('answerDesc').textContent=data.description||'아래 항목에 응답해주세요.';
+  const {data,error}=await db.rpc('payble_get_public_survey_code',{p_survey_id:id});
+  const row=Array.isArray(data)?data[0]:data;
+  if(error||!row){document.getElementById('answerArea').innerHTML='<div class="empty">설문을 불러오지 못했습니다. 링크를 확인해주세요.</div>';return;}
+  currentSurveyForAnswer=row;survey=row.form_schema||{title:row.title,description:row.description,questions:[]};
+  document.getElementById('answerTitle').textContent=row.title;document.getElementById('answerDesc').textContent=row.description||'아래 항목에 응답해주세요.';
   const area=document.getElementById('answerArea');area.innerHTML=survey.questions.map((q,i)=>renderAnswerQuestion(q,i,'answer')).join('');wireAnswerArea(area);
   document.getElementById('submitAnswerBtn').classList.remove('hidden');document.getElementById('submitAnswerBtn').disabled=false;showResult('answerResult','설문을 불러왔습니다.');
 }
@@ -326,37 +455,70 @@ async function submitAnswer(){
   const area=document.getElementById('answerArea');const answers=getAreaAnswers(area);
   for(const q of survey.questions){const el=area.querySelector(`[data-question-id="${q.id}"]`);if(!el||el.classList.contains('hidden'))continue;const val=answers[q.id];const empty=Array.isArray(val)?val.length===0:String(val||'').trim()==='';if(q.required&&empty)return toast(`${q.title||'필수 질문'}에 응답해주세요.`);}
   const namedAnswers={};survey.questions.forEach(q=>{const el=area.querySelector(`[data-question-id="${q.id}"]`);if(el&&!el.classList.contains('hidden'))namedAnswers[q.title||q.id]=answers[q.id];});
-  const {error}=await db.from('payble_survey_responses').insert({survey_id:currentSurveyForAnswer.id,answers:namedAnswers,raw_answers:answers,respondent_meta:{userAgent:navigator.userAgent.slice(0,120)}});
+  const {error}=await db.rpc('payble_submit_survey_response_code',{
+    p_survey_id:currentSurveyForAnswer.id,
+    p_answers:namedAnswers,
+    p_raw_answers:answers
+  });
   if(error){showResult('answerResult','응답 제출 실패: '+error.message);return;}
   showResult('answerResult','응답이 제출되었습니다. 참여해주셔서 감사합니다.');document.getElementById('submitAnswerBtn').disabled=true;
 }
 
 async function loadMySurveys(){
-  const {data:{user}}=await db.auth.getUser();
-  const wrap=document.getElementById('mySurveyList');
-  if(!user){wrap.innerHTML='<div class="empty">로그인 후 내 설문을 확인할 수 있습니다.</div>';return;}
-  const {data,error}=await db.from('payble_public_surveys').select('id,title,description,created_at,updated_at,is_published,form_schema').eq('owner_id',user.id).order('created_at',{ascending:false});
-  if(error){wrap.innerHTML='<div class="empty">내 설문을 불러오지 못했습니다: '+escapeHtml(error.message)+'</div>';return;}
-  if(!data||!data.length){wrap.innerHTML='<div class="empty">아직 만든 설문이 없습니다.</div>';return;}
-  wrap.innerHTML=data.map(s=>{const link=location.origin+location.pathname+'?survey='+encodeURIComponent(s.id);return `<div class="survey-item"><div class="survey-item-title">${escapeHtml(s.title)}</div><div class="survey-item-meta">${escapeHtml(s.description||'설명 없음')}<br>생성일: ${new Date(s.created_at).toLocaleString('ko-KR')}</div><div class="link-box">${escapeHtml(link)}</div><div class="actions"><button class="btn ghost small" onclick="copyText('${jsStr(link)}')">링크 복사</button><button class="btn blue small" onclick="editSurvey('${s.id}')">수정</button><button class="btn green small" onclick="loadResponses('${s.id}')">응답 보기</button><button class="btn ghost small" onclick="downloadResponsesCsv('${s.id}')">CSV 다운로드</button><button class="btn red small" onclick="deleteSurvey('${s.id}')">삭제</button></div></div>`;}).join('');
+  renderRecentSurveys();
+}
+async function loadManagedSurvey(){
+  const {id,code}=getManageFields();
+  if(!id||!code)return toast('설문 ID와 관리 코드를 입력해주세요.');
+  const {data,error}=await db.rpc('payble_get_manage_survey_code',{p_survey_id:id,p_manage_code:code});
+  const row=Array.isArray(data)?data[0]:data;
+  if(error||!row){showResult('manageResult','설문을 불러오지 못했습니다. 설문 ID 또는 관리 코드를 확인해주세요.');return;}
+  currentManagedSurveyId=row.id;currentManageCode=code;
+  survey=row.form_schema||{title:row.title,description:row.description,questions:[]};survey.id=row.id;
+  document.getElementById('surveyTitle').value=survey.title||row.title||'';
+  document.getElementById('surveyDesc').value=survey.description||row.description||'';
+  document.getElementById('surveyManageCode').value=code;
+  rememberSurvey(row.id,row.title);
+  renderBuilder();switchMode('builder');toast('수정할 설문을 불러왔습니다.');
 }
 async function editSurvey(id){
-  const {data,error}=await db.from('payble_public_surveys').select('*').eq('id',id).single();
-  if(error||!data)return toast('설문을 불러오지 못했습니다.');
-  survey=data.form_schema||{title:data.title,description:data.description,questions:[]};survey.id=data.id;
-  document.getElementById('surveyTitle').value=survey.title||data.title||'';document.getElementById('surveyDesc').value=survey.description||data.description||'';renderBuilder();switchMode('builder');toast('수정할 설문을 불러왔습니다.');
+  document.getElementById('manageSurveyId').value=id;
+  switchMode('mine');
+  toast('관리 코드를 입력한 뒤 설문을 불러오세요.');
 }
 async function deleteSurvey(id){
-  if(!confirm('이 설문과 응답을 삭제할까요? 되돌릴 수 없습니다.'))return;
-  const {error}=await db.from('payble_public_surveys').delete().eq('id',id);
-  if(error)return toast('삭제 실패: '+error.message);
-  toast('삭제되었습니다.');loadMySurveys();document.getElementById('responseTable').innerHTML='';
+  document.getElementById('manageSurveyId').value=id;
+  switchMode('mine');
+  toast('관리 코드를 입력한 뒤 삭제할 수 있습니다.');
 }
-async function loadResponses(id){
-  const {data,error}=await db.from('payble_survey_responses').select('*').eq('survey_id',id).order('created_at',{ascending:false});
+async function deleteManagedSurvey(){
+  const {id,code}=getManageFields();
+  if(!id||!code)return toast('설문 ID와 관리 코드를 입력해주세요.');
+  if(!confirm('이 설문과 응답을 삭제할까요? 되돌릴 수 없습니다.'))return;
+  const {data,error}=await db.rpc('payble_delete_survey_code',{p_survey_id:id,p_manage_code:code});
+  if(error||data!==true)return toast('삭제 실패: '+(error?.message||'설문 ID 또는 관리 코드가 맞지 않습니다.'));
+  toast('삭제되었습니다.');
+  document.getElementById('responseTable').innerHTML='';
+  showResult('manageResult','설문이 삭제되었습니다.');
+}
+async function loadResponses(id,code){
+  const surveyId=id || getManageFields().id;
+  const manageCode=code || getManageFields().code;
+  if(!surveyId||!manageCode){showResult('manageResult','설문 ID와 관리 코드를 입력해주세요.');return;}
+  const {data,error}=await db.rpc('payble_get_survey_responses_code',{p_survey_id:surveyId,p_manage_code:manageCode});
   if(error){showResult('manageResult','응답 불러오기 실패: '+error.message);return;}
   loadedResponses=data||[];showResult('manageResult',`총 ${loadedResponses.length}개의 응답을 불러왔습니다.`);renderResponses();
 }
+async function loadManagedResponses(){
+  const {id,code}=getManageFields();
+  await loadResponses(id,code);
+}
+
+
+
+
+
+
 function renderResponses(){
   const wrap=document.getElementById('responseTable');
   if(!loadedResponses.length){wrap.innerHTML='<div class="empty">아직 응답이 없습니다.</div>';return;}
@@ -373,13 +535,17 @@ async function downloadResponsesCsv(id){
   const csv=rows.map(row=>row.map(cell=>`"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='payble-survey-responses.csv';a.click();URL.revokeObjectURL(a.href);
 }
+async function downloadManagedResponsesCsv(){
+  const {id,code}=getManageFields();
+  if(!loadedResponses.length) await loadResponses(id,code);
+  if(!loadedResponses.length)return toast('다운로드할 응답이 없습니다.');
+  await downloadResponsesCsv(id);
+}
 
 document.getElementById('surveyTitle').addEventListener('input',renderPreview);
 document.getElementById('surveyDesc').addEventListener('input',renderPreview);
-db.auth.onAuthStateChange(()=>refreshAuth());
-
 (function init(){
-  refreshAuth();
+  renderRecentSurveys();
   addQuestion('radio');
   survey.questions[0].title='가장 만족한 부분은 무엇인가요?';
   survey.questions[0].options=['가격','기능','디자인','고객지원','기타'];
